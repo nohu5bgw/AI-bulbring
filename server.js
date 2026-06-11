@@ -4,8 +4,10 @@ const helmet    = require('helmet');
 const cors      = require('cors');
 const path      = require('path');
 
-const agentRouter = require('./routes/agent');
-const authRouter  = require('./routes/auth');
+const agentRouter   = require('./routes/agent');
+const authRouter    = require('./routes/auth');
+const invoiceRouter = require('./routes/invoice');
+const tbRouter      = require('./routes/tb');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -30,8 +32,10 @@ app.use(cors({ origin: allowedOrigin }));
 app.use(express.json());
 
 // API routes
-app.use('/api/auth',  authRouter);
-app.use('/api/agent', agentRouter);
+app.use('/api/auth',    authRouter);
+app.use('/api/agent',  agentRouter);
+app.use('/api/invoice', invoiceRouter);
+app.use('/api/tb',      tbRouter);
 
 // Serve frontend
 app.use(express.static(path.join(__dirname, 'public')));

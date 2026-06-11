@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice Generator — Bulbring AI</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="topbar">
+    <a href="/dashboard.html" class="topbar-brand">
+      <div class="brand-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-5 11.6V16h10v-2.4A7 7 0 0 0 12 2z" fill="rgba(255,255,255,0.95)"/><rect x="9" y="17.5" width="6" height="2" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="9.5" y="20.5" width="5" height="1.5" rx=".75" fill="rgba(255,255,255,0.5)"/></svg>
+      </div>
+      Bulbring AI
+    </a>
+    <div class="topbar-right">
+      <span class="topbar-email">Virtualpostman2007</span>
+      <button class="btn-topbar-logout" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="main-wide">
+
+    <div class="breadcrumb">
+      <a href="/dashboard.html">Dashboard</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Invoice Generator</span>
+    </div>
+
+    <div class="page-header">
+      <h1>Invoice Generator</h1>
+      <p>Fill in the details below and download a professional Excel invoice.</p>
+    </div>
+
+    <form id="invoice-form">
+
+      <!-- From -->
+      <div class="card">
+        <div class="card-title">From (Your Business)</div>
+        <div class="form-grid">
+          <div class="field"><label>Business Name</label><input type="text" id="businessName" placeholder="Acme Corp" /></div>
+          <div class="field"><label>HST Number</label><input type="text" id="businessHST" placeholder="123456789 RT0001" /></div>
+          <div class="field"><label>Address</label><input type="text" id="businessAddress" placeholder="123 Main St" /></div>
+          <div class="field"><label>City, Province, Postal</label><input type="text" id="businessCity" placeholder="Toronto, ON M5V 1A1" /></div>
+          <div class="field"><label>Email</label><input type="email" id="businessEmail" placeholder="you@example.com" /></div>
+          <div class="field"><label>Phone</label><input type="tel" id="businessPhone" placeholder="(416) 555-0100" /></div>
+        </div>
+        <label class="save-row"><input type="checkbox" id="save-biz" checked /> Remember my business info</label>
+      </div>
+
+      <!-- Bill To -->
+      <div class="card">
+        <div class="card-title">Bill To (Client)</div>
+        <div class="form-grid">
+          <div class="field"><label>Client Name / Company</label><input type="text" id="clientName" placeholder="Client Inc." /></div>
+          <div class="field"><label>Email</label><input type="email" id="clientEmail" placeholder="client@example.com" /></div>
+          <div class="field"><label>Address</label><input type="text" id="clientAddress" placeholder="456 Bay St" /></div>
+          <div class="field"><label>City, Province, Postal</label><input type="text" id="clientCity" placeholder="Toronto, ON M5H 2T4" /></div>
+        </div>
+      </div>
+
+      <!-- Invoice Details -->
+      <div class="card">
+        <div class="card-title">Invoice Details</div>
+        <div class="form-grid">
+          <div class="field"><label>Invoice Number</label><input type="text" id="invoiceNumber" placeholder="INV-001" /></div>
+          <div class="field"><label>Invoice Date</label><input type="date" id="invoiceDate" /></div>
+          <div class="field"><label>Due Date</label><input type="date" id="dueDate" /></div>
+          <div class="field"><label>Payment Terms</label><input type="text" id="paymentTerms" placeholder="Net 30" /></div>
+        </div>
+      </div>
+
+      <!-- Line Items -->
+      <div class="card">
+        <div class="card-title">Line Items</div>
+        <div class="line-items-header">
+          <span class="li-desc">Description</span>
+          <span class="li-qty">Qty</span>
+          <span class="li-price">Unit Price</span>
+          <span class="li-amt">Amount</span>
+          <span class="li-del"></span>
+        </div>
+        <div id="line-items"></div>
+        <button type="button" class="btn btn-ghost" id="add-line" style="margin-top:12px;">+ Add Line Item</button>
+
+        <hr class="divider" />
+
+        <div class="totals-block">
+          <div class="totals-row"><span>Subtotal</span><span id="subtotal-display">$0.00</span></div>
+          <div class="totals-row">
+            <span>
+              Tax &nbsp;
+              <select id="taxRate" class="inline-select">
+                <option value="0">None</option>
+                <option value="0.05">GST 5%</option>
+                <option value="0.13" selected>HST 13%</option>
+                <option value="0.15">HST 15%</option>
+              </select>
+            </span>
+            <span id="tax-display">$0.00</span>
+          </div>
+          <div class="totals-row totals-total"><span>Total Due</span><span id="total-display">$0.00</span></div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="card">
+        <div class="card-title">Notes</div>
+        <div class="field" style="margin:0">
+          <textarea id="notes" rows="3" placeholder="Payment instructions, thank you message, etc." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-family:inherit;resize:vertical;outline:none;"></textarea>
+        </div>
+      </div>
+
+      <div id="invoice-alert" class="alert alert-error"></div>
+
+      <div class="action-row">
+        <button type="submit" class="btn btn-primary" id="generate-btn">Generate Invoice</button>
+      </div>
+
+    </form>
+
+  </div>
+
+  <style>
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+    .save-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-top: 8px; cursor: pointer; }
+    .save-row input { cursor: pointer; }
+    .line-items-header { display: grid; grid-template-columns: 1fr 80px 120px 110px 32px; gap: 8px; padding: 0 0 8px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; }
+    .line-item-row { display: grid; grid-template-columns: 1fr 80px 120px 110px 32px; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .line-item-row:last-child { border-bottom: none; }
+    .line-item-row input { width: 100%; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; outline: none; }
+    .line-item-row input:focus { border-color: var(--navy); }
+    .line-item-row .li-amount { font-size: 13px; font-weight: 600; color: var(--navy); text-align: right; }
+    .li-del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 0; line-height: 1; }
+    .li-del-btn:hover { color: var(--red); }
+    .totals-block { margin-top: 16px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+    .totals-row { display: flex; gap: 40px; font-size: 13px; color: var(--sub); align-items: center; }
+    .totals-total { font-size: 15px; font-weight: 700; color: var(--navy); padding-top: 8px; border-top: 2px solid var(--border); }
+    .inline-select { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 3px 6px; font-size: 12px; outline: none; background: white; }
+    .li-desc { } .li-qty { text-align: right; } .li-price { text-align: right; } .li-amt { text-align: right; } .li-del { }
+  </style>
+
+  <script>
+    if (!localStorage.getItem('token')) window.location.href = '/';
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      window.location.href = '/';
+    });
+
+    // Set today's date and default due date (Net 30)
+    const today = new Date();
+    const fmt = d => d.toISOString().split('T')[0];
+    document.getElementById('invoiceDate').value = fmt(today);
+    const due = new Date(today); due.setDate(due.getDate() + 30);
+    document.getElementById('dueDate').value = fmt(due);
+
+    // Load saved business info
+    const BIZ_KEY = 'bulbring_biz';
+    const saved = JSON.parse(localStorage.getItem(BIZ_KEY) || '{}');
+    ['businessName','businessHST','businessAddress','businessCity','businessEmail','businessPhone'].forEach(id => {
+      if (saved[id]) document.getElementById(id).value = saved[id];
+    });
+
+    // Line items
+    let lineItems = [];
+
+    function addLine(desc = '', qty = 1, price = '') {
+      const id = Date.now() + Math.random();
+      lineItems.push({ id, desc, qty, price });
+      renderLines();
+    }
+
+    function renderLines() {
+      const container = document.getElementById('line-items');
+      container.innerHTML = '';
+      lineItems.forEach((item, i) => {
+        const row = document.createElement('div');
+        row.className = 'line-item-row';
+        const amt = (parseFloat(item.qty) || 0) * (parseFloat(item.price) || 0);
+        row.innerHTML = `
+          <input type="text"   class="li-desc-input"  placeholder="Service description" value="${escHtml(item.desc)}" data-i="${i}" data-field="desc" />
+          <input type="number" class="li-qty-input"   placeholder="1"  value="${item.qty}"  data-i="${i}" data-field="qty"   min="0" step="any" style="text-align:right" />
+          <input type="number" class="li-price-input" placeholder="0.00" value="${item.price}" data-i="${i}" data-field="price" min="0" step="0.01" style="text-align:right" />
+          <div class="li-amount">${fmtMoney(amt)}</div>
+          <button type="button" class="li-del-btn" data-i="${i}">✕</button>
+        `;
+        container.appendChild(row);
+      });
+      container.querySelectorAll('input').forEach(inp => {
+        inp.addEventListener('input', e => {
+          const i = +e.target.dataset.i, field = e.target.dataset.field;
+          lineItems[i][field] = e.target.value;
+          updateTotals();
+          // re-render just the amount cell
+          const rows = container.querySelectorAll('.line-item-row');
+          const amt = (parseFloat(lineItems[i].qty) || 0) * (parseFloat(lineItems[i].price) || 0);
+          rows[i].querySelector('.li-amount').textContent = fmtMoney(amt);
+        });
+      });
+      container.querySelectorAll('.li-del-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          lineItems.splice(+e.target.dataset.i, 1);
+          renderLines();
+          updateTotals();
+        });
+      });
+      updateTotals();
+    }
+
+    function updateTotals() {
+      const subtotal = lineItems.reduce((s, item) => s + (parseFloat(item.qty)||0)*(parseFloat(item.price)||0), 0);
+      const rate = parseFloat(document.getElementById('taxRate').value) || 0;
+      const tax = subtotal * rate;
+      document.getElementById('subtotal-display').textContent = fmtMoney(subtotal);
+      document.getElementById('tax-display').textContent = fmtMoney(tax);
+      document.getElementById('total-display').textContent = fmtMoney(subtotal + tax);
+    }
+
+    function fmtMoney(n) {
+      return new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(n);
+    }
+    function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+    document.getElementById('add-line').addEventListener('click', () => addLine());
+    document.getElementById('taxRate').addEventListener('change', updateTotals);
+
+    addLine(); // start with one empty row
+
+    // Submit
+    document.getElementById('invoice-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = document.getElementById('generate-btn');
+      const alert = document.getElementById('invoice-alert');
+      alert.classList.remove('show');
+
+      if (lineItems.length === 0 || !lineItems.some(l => l.desc || l.price)) {
+        alert.textContent = 'Add at least one line item.';
+        alert.classList.add('show');
+        return;
+      }
+
+      // Save biz info
+      if (document.getElementById('save-biz').checked) {
+        const biz = {};
+        ['businessName','businessHST','businessAddress','businessCity','businessEmail','businessPhone'].forEach(id => {
+          biz[id] = document.getElementById(id).value;
+        });
+        localStorage.setItem(BIZ_KEY, JSON.stringify(biz));
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Generating…';
+
+      const payload = {
+        businessName:    document.getElementById('businessName').value,
+        businessAddress: document.getElementById('businessAddress').value,
+        businessCity:    document.getElementById('businessCity').value,
+        businessHST:     document.getElementById('businessHST').value,
+        businessEmail:   document.getElementById('businessEmail').value,
+        businessPhone:   document.getElementById('businessPhone').value,
+        clientName:      document.getElementById('clientName').value,
+        clientAddress:   document.getElementById('clientAddress').value,
+        clientCity:      document.getElementById('clientCity').value,
+        clientEmail:     document.getElementById('clientEmail').value,
+        invoiceNumber:   document.getElementById('invoiceNumber').value,
+        invoiceDate:     document.getElementById('invoiceDate').value,
+        dueDate:         document.getElementById('dueDate').value,
+        paymentTerms:    document.getElementById('paymentTerms').value,
+        taxRate:         parseFloat(document.getElementById('taxRate').value) || 0,
+        notes:           document.getElementById('notes').value,
+        lineItems: lineItems.map(l => ({ description: l.desc, qty: l.qty, unitPrice: l.price })),
+      };
+
+      try {
+        const res = await fetch('/api/invoice/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.status === 401) { localStorage.removeItem('token'); window.location.href = '/'; return; }
+        if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || 'Generation failed'); }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `invoice-${payload.invoiceNumber || new Date().toISOString().split('T')[0]}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        alert.textContent = err.message;
+        alert.classList.add('show');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Generate Invoice';
+      }
+    });
+  </script>
+</body>
+</html>

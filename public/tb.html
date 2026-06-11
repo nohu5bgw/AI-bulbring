@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trial Balance Generator — Bulbring AI</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="topbar">
+    <a href="/dashboard.html" class="topbar-brand">
+      <div class="brand-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-5 11.6V16h10v-2.4A7 7 0 0 0 12 2z" fill="rgba(255,255,255,0.95)"/><rect x="9" y="17.5" width="6" height="2" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="9.5" y="20.5" width="5" height="1.5" rx=".75" fill="rgba(255,255,255,0.5)"/></svg>
+      </div>
+      Bulbring AI
+    </a>
+    <div class="topbar-right">
+      <span class="topbar-email">Virtualpostman2007</span>
+      <button class="btn-topbar-logout" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="main-wide">
+
+    <div class="breadcrumb">
+      <a href="/dashboard.html">Dashboard</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Trial Balance Generator</span>
+    </div>
+
+    <div class="page-header">
+      <h1>Trial Balance Generator</h1>
+      <p>Enter account balances to generate a formatted trial balance Excel file.</p>
+    </div>
+
+    <form id="tb-form">
+
+      <!-- Period -->
+      <div class="card">
+        <div class="card-title">Period</div>
+        <div class="form-grid">
+          <div class="field"><label>Business Name (optional)</label><input type="text" id="businessName" placeholder="Acme Corp" /></div>
+          <div class="field"></div>
+          <div class="field"><label>Period Start</label><input type="date" id="periodStart" /></div>
+          <div class="field"><label>Period End</label><input type="date" id="periodEnd" /></div>
+        </div>
+      </div>
+
+      <!-- Account balances -->
+      <div class="card">
+        <div class="card-title">Account Balances</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Enter positive amounts for normal balances. Leave blank to exclude an account from the report.</p>
+
+        <div class="tb-balance-check" id="balance-check">
+          <span id="check-icon">—</span>
+          <span>Debits: <strong id="total-debit">$0.00</strong></span>
+          <span>Credits: <strong id="total-credit">$0.00</strong></span>
+          <span id="balance-status"></span>
+        </div>
+
+        <div id="accounts-table"></div>
+      </div>
+
+      <div id="tb-alert" class="alert alert-error"></div>
+
+      <div class="action-row">
+        <button type="submit" class="btn btn-primary" id="generate-btn">Generate Trial Balance</button>
+      </div>
+
+    </form>
+
+  </div>
+
+  <style>
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .tb-section-header {
+      background: var(--blue-soft);
+      padding: 7px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--navy);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      border-radius: var(--radius-sm);
+      margin: 16px 0 6px;
+    }
+    .tb-section-header:first-child { margin-top: 0; }
+
+    .tb-account-row {
+      display: grid;
+      grid-template-columns: 70px 1fr 150px;
+      gap: 12px;
+      align-items: center;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .tb-account-row:last-child { border-bottom: none; }
+    .tb-code { font-size: 11px; color: var(--muted); font-weight: 600; }
+    .tb-name { font-size: 13px; color: var(--text); }
+    .tb-normal { font-size: 10px; color: var(--muted); }
+    .tb-input-wrap { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
+    .tb-input-wrap input {
+      width: 120px;
+      padding: 6px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      text-align: right;
+      outline: none;
+    }
+    .tb-input-wrap input:focus { border-color: var(--navy); }
+
+    .tb-balance-check {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--sub);
+      margin-bottom: 20px;
+    }
+    .balanced   { color: var(--green); font-weight: 600; }
+    .unbalanced { color: var(--red);   font-weight: 600; }
+  </style>
+
+  <script>
+    if (!localStorage.getItem('token')) window.location.href = '/';
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      window.location.href = '/';
+    });
+
+    // Default period: current year
+    const y = new Date().getFullYear();
+    document.getElementById('periodStart').value = `${y}-01-01`;
+    document.getElementById('periodEnd').value   = `${y}-12-31`;
+
+    const ACCOUNTS = [
+      { code: '1000', name: 'Cash & Bank',                              section: 'Assets',      normal: 'debit' },
+      { code: '1100', name: 'Accounts Receivable',                      section: 'Assets',      normal: 'debit' },
+      { code: '1200', name: 'Prepaid Expenses',                         section: 'Assets',      normal: 'debit' },
+      { code: '1900', name: 'Other Assets',                             section: 'Assets',      normal: 'debit' },
+      { code: '2000', name: 'Visa / Credit Card',                       section: 'Liabilities', normal: 'credit' },
+      { code: '2100', name: 'Accounts Payable',                         section: 'Liabilities', normal: 'credit' },
+      { code: '2200', name: 'HST / GST Payable',                        section: 'Liabilities', normal: 'credit' },
+      { code: '2300', name: 'Loans Payable',                            section: 'Liabilities', normal: 'credit' },
+      { code: '2900', name: 'Other Liabilities',                        section: 'Liabilities', normal: 'credit' },
+      { code: '3000', name: "Owner's Equity / Capital",                 section: 'Equity',      normal: 'credit' },
+      { code: '3100', name: 'Retained Earnings',                        section: 'Equity',      normal: 'credit' },
+      { code: '3200', name: "Owner's Drawings",                         section: 'Equity',      normal: 'debit' },
+      { code: '4000', name: 'Business Income',                          section: 'Revenue',     normal: 'credit' },
+      { code: '4100', name: 'Other Income',                             section: 'Revenue',     normal: 'credit' },
+      { code: '6100', name: 'Vehicle Expenses — Fuel',                  section: 'Expenses',    normal: 'debit' },
+      { code: '6110', name: 'Vehicle Expenses — Repairs & Maintenance', section: 'Expenses',    normal: 'debit' },
+      { code: '6120', name: 'Vehicle Expenses — Lease',                 section: 'Expenses',    normal: 'debit' },
+      { code: '6200', name: 'Dues & Memberships — CPA',                 section: 'Expenses',    normal: 'debit' },
+      { code: '6210', name: 'Dues & Memberships — Other',               section: 'Expenses',    normal: 'debit' },
+      { code: '6300', name: 'Advertising — Client Gifts',               section: 'Expenses',    normal: 'debit' },
+      { code: '6310', name: 'Advertising — Client Entertainment',       section: 'Expenses',    normal: 'debit' },
+      { code: '6320', name: 'Advertising — Meals & Promotion',          section: 'Expenses',    normal: 'debit' },
+      { code: '6400', name: 'Staff Meals',                              section: 'Expenses',    normal: 'debit' },
+      { code: '6500', name: 'Travel — Accommodation',                   section: 'Expenses',    normal: 'debit' },
+      { code: '6510', name: 'Travel — Meals',                           section: 'Expenses',    normal: 'debit' },
+      { code: '6520', name: 'Travel — General',                         section: 'Expenses',    normal: 'debit' },
+      { code: '6600', name: 'Office Expenses — Supplies',               section: 'Expenses',    normal: 'debit' },
+      { code: '6610', name: 'Office Expenses — Telephone & Internet',   section: 'Expenses',    normal: 'debit' },
+      { code: '6700', name: 'Professional Fees — Accounting',           section: 'Expenses',    normal: 'debit' },
+      { code: '6710', name: 'Professional Fees — Legal',                section: 'Expenses',    normal: 'debit' },
+      { code: '6800', name: 'Bank Charges — Interest',                  section: 'Expenses',    normal: 'debit' },
+      { code: '6810', name: 'Bank Charges — Fees',                      section: 'Expenses',    normal: 'debit' },
+      { code: '6900', name: 'Other Business Expenses',                  section: 'Expenses',    normal: 'debit' },
+    ];
+
+    // Render accounts table
+    const table = document.getElementById('accounts-table');
+    let currentSection = null;
+
+    ACCOUNTS.forEach(acc => {
+      if (acc.section !== currentSection) {
+        currentSection = acc.section;
+        const hdr = document.createElement('div');
+        hdr.className = 'tb-section-header';
+        hdr.textContent = acc.section;
+        table.appendChild(hdr);
+      }
+      const row = document.createElement('div');
+      row.className = 'tb-account-row';
+      row.innerHTML = `
+        <span class="tb-code">${acc.code}</span>
+        <span class="tb-name">${acc.name} <span class="tb-normal">(${acc.normal})</span></span>
+        <div class="tb-input-wrap">
+          <input type="number" id="acc-${acc.code}" placeholder="0.00" min="0" step="0.01" data-code="${acc.code}" data-normal="${acc.normal}" />
+        </div>
+      `;
+      table.appendChild(row);
+    });
+
+    // Live balance check
+    function updateBalanceCheck() {
+      let totalDebit = 0, totalCredit = 0;
+      ACCOUNTS.forEach(acc => {
+        const raw = parseFloat(document.getElementById(`acc-${acc.code}`)?.value) || 0;
+        if (raw === 0) return;
+        const isNormalDebit = acc.normal === 'debit';
+        const debit  = raw > 0 ? (isNormalDebit ? raw : 0) : (!isNormalDebit ? Math.abs(raw) : 0);
+        const credit = raw > 0 ? (!isNormalDebit ? raw : 0) : (isNormalDebit ? Math.abs(raw) : 0);
+        totalDebit  += debit;
+        totalCredit += credit;
+      });
+      const fmt = n => new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(n);
+      document.getElementById('total-debit').textContent  = fmt(totalDebit);
+      document.getElementById('total-credit').textContent = fmt(totalCredit);
+      const diff = Math.abs(totalDebit - totalCredit);
+      const statusEl = document.getElementById('balance-status');
+      const iconEl   = document.getElementById('check-icon');
+      if (totalDebit === 0 && totalCredit === 0) {
+        statusEl.textContent = ''; iconEl.textContent = '—';
+      } else if (diff < 0.01) {
+        statusEl.className = 'balanced';   statusEl.textContent = '✓ Balanced';   iconEl.textContent = '✓';
+      } else {
+        statusEl.className = 'unbalanced'; statusEl.textContent = `Off by ${fmt(diff)}`; iconEl.textContent = '⚠';
+      }
+    }
+
+    table.addEventListener('input', updateBalanceCheck);
+
+    // Submit
+    document.getElementById('tb-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn   = document.getElementById('generate-btn');
+      const alert = document.getElementById('tb-alert');
+      alert.classList.remove('show');
+
+      const balances = {};
+      ACCOUNTS.forEach(acc => {
+        const val = parseFloat(document.getElementById(`acc-${acc.code}`)?.value);
+        if (!isNaN(val) && val !== 0) balances[acc.code] = val;
+      });
+
+      if (Object.keys(balances).length === 0) {
+        alert.textContent = 'Enter at least one account balance.';
+        alert.classList.add('show');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Generating…';
+
+      try {
+        const res = await fetch('/api/tb/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
+          body: JSON.stringify({
+            businessName: document.getElementById('businessName').value,
+            periodStart:  document.getElementById('periodStart').value,
+            periodEnd:    document.getElementById('periodEnd').value,
+            balances,
+          }),
+        });
+
+        if (res.status === 401) { localStorage.removeItem('token'); window.location.href = '/'; return; }
+        if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || 'Generation failed'); }
+
+        const blob = await res.blob();
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = `trial-balance-${new Date().toISOString().split('T')[0]}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        alert.textContent = err.message;
+        alert.classList.add('show');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Generate Trial Balance';
+      }
+    });
+  </script>
+</body>
+</html>
