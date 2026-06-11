@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bank Statement Tool — Bulbring AI</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="topbar">
+    <a href="/dashboard.html" class="topbar-brand">
+      <div class="brand-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-5 11.6V16h10v-2.4A7 7 0 0 0 12 2z" fill="rgba(255,255,255,0.95)"/><rect x="9" y="17.5" width="6" height="2" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="9.5" y="20.5" width="5" height="1.5" rx=".75" fill="rgba(255,255,255,0.5)"/></svg>
+      </div>
+      Bulbring AI
+    </a>
+    <div class="topbar-right">
+      <span class="topbar-email">Virtualpostman2007</span>
+      <button class="btn-topbar-logout" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="main-wide">
+
+    <div class="breadcrumb">
+      <a href="/dashboard.html">Dashboard</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Bank Statement Transaction Tool</span>
+    </div>
+
+    <div class="page-header">
+      <h1>Bank Statement Transaction Tool</h1>
+      <p>Upload one or more PDF bank statements. Every transaction is categorized to CRA T2125 expense codes and exported to Excel.</p>
+    </div>
+
+    <!-- Upload + output type -->
+    <div class="card">
+      <div class="card-title">Upload Statement</div>
+
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="file-input" accept="application/pdf" multiple />
+        <span class="drop-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </span>
+        <h3>Drop your PDF bank statements here</h3>
+        <p>or click to browse &nbsp;·&nbsp; multiple files supported &nbsp;·&nbsp; max 20 MB each</p>
+      </div>
+
+      <div class="file-selected" id="file-selected">
+        <span>📄</span>
+        <span class="file-selected-name" id="file-name"></span>
+        <span class="file-clear" id="file-clear" title="Remove">✕</span>
+      </div>
+      <div id="file-list" style="display:none; margin: 6px 0 0 0; padding: 8px 12px; background: var(--bg); border-radius: 6px; font-size: 12px; color: var(--text-muted, #666); line-height: 1.8;"></div>
+
+      <!-- Output type picker — appears after file chosen -->
+      <div id="output-section" style="display:none;">
+        <hr class="divider" />
+        <div class="card-title" style="margin-bottom:14px;">Output Format</div>
+        <div class="output-picker show">
+
+          <label class="output-option selected" id="opt-excel">
+            <input type="radio" name="output" value="excel" checked />
+            <span class="output-option-icon">📊</span>
+            <h4>Excel File (.xlsx)</h4>
+            <p>CRA T2125 categories, running balance, GST/HST tracker — ready for your accountant</p>
+          </label>
+
+          <label class="output-option" id="opt-tb">
+            <input type="radio" name="output" value="tb_import" />
+            <span class="output-option-icon">📋</span>
+            <h4>Trial Balance Import (.xlsx)</h4>
+            <p>Account-coded summary by CRA category — ready to import into QuickBooks, Xero, or your accounting software</p>
+          </label>
+
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-steps" id="progress-steps">
+        <div class="step" id="step-1"><div class="step-dot">1</div> Extracting text from PDF</div>
+        <div class="step" id="step-2"><div class="step-dot">2</div> Analyzing transactions with CRA rules</div>
+        <div class="step" id="step-3"><div class="step-dot">3</div> Building Excel spreadsheet</div>
+      </div>
+
+      <!-- Result -->
+      <div class="result-banner" id="result-banner">
+        <div>
+          <h3>Your file is ready</h3>
+          <p id="result-sub">CRA-organized Excel spreadsheet</p>
+        </div>
+        <button class="btn btn-green" id="download-btn">Download</button>
+      </div>
+
+      <div id="upload-alert" class="alert alert-error" style="margin-top:16px;"></div>
+
+      <div class="action-row">
+        <button class="btn btn-primary" id="process-btn" disabled>Process Statement</button>
+        <button class="btn btn-ghost" id="reset-btn" style="display:none;">Upload Another</button>
+      </div>
+    </div>
+
+    <!-- What's inside -->
+    <div class="card">
+      <div class="card-title">What's in the Excel file</div>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">Sheet 1</div>
+          <div class="info-value">All Transactions</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Sheet 2</div>
+          <div class="info-value">T2125 Summary</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Sheet 3</div>
+          <div class="info-value">GST / HST Tracker</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Format</div>
+          <div class="info-value">Matches your template</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      <strong>Disclaimer</strong>
+      AI-generated estimates for organizational purposes only — not tax advice. Always verify categorizations
+      with a qualified Canadian CPA before filing. Meals &amp; entertainment are capped at 50% deductibility.
+      Motor vehicle claims require a CRA-compliant logbook. Keep all original receipts.
+    </div>
+
+  </div>
+
+  <script>
+    if (!localStorage.getItem('token')) window.location.href = '/';
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      window.location.href = '/';
+    });
+
+    let selectedFiles = [];
+    let resultBlob    = null;
+
+    // ── File handling ────────────────────────────────────────────────────────
+    const dropZone  = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+
+    fileInput.addEventListener('change', () => handleFiles(Array.from(fileInput.files)));
+    dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      if (e.dataTransfer.files.length) handleFiles(Array.from(e.dataTransfer.files));
+    });
+
+    function handleFiles(files) {
+      if (!files.length) return;
+      const nonPdf = files.find(f => f.type !== 'application/pdf');
+      if (nonPdf) { showAlert(`"${nonPdf.name}" is not a PDF.`); return; }
+      const tooBig = files.find(f => f.size > 20 * 1024 * 1024);
+      if (tooBig) { showAlert(`"${tooBig.name}" is too large — max 20 MB per file.`); return; }
+      hideAlert();
+      selectedFiles = files;
+
+      if (selectedFiles.length === 1) {
+        document.getElementById('file-name').textContent = selectedFiles[0].name;
+        document.getElementById('file-list').style.display = 'none';
+      } else {
+        document.getElementById('file-name').textContent = `${selectedFiles.length} PDFs selected`;
+        const list = document.getElementById('file-list');
+        list.innerHTML = selectedFiles.map(f => `📄 ${f.name}`).join('<br>');
+        list.style.display = 'block';
+      }
+
+      document.getElementById('file-selected').classList.add('show');
+      document.getElementById('output-section').style.display = 'block';
+      document.getElementById('process-btn').disabled = false;
+      resetResult();
+    }
+
+    document.getElementById('file-clear').addEventListener('click', () => {
+      selectedFiles = [];
+      fileInput.value = '';
+      document.getElementById('file-selected').classList.remove('show');
+      document.getElementById('file-list').style.display = 'none';
+      document.getElementById('output-section').style.display = 'none';
+      document.getElementById('process-btn').disabled = true;
+      resetResult();
+      hideAlert();
+    });
+
+    // ── Output option selection ───────────────────────────────────────────────
+    document.querySelectorAll('.output-option:not(.output-option--disabled)').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.output-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        opt.querySelector('input[type="radio"]').checked = true;
+      });
+    });
+
+    // ── Process ──────────────────────────────────────────────────────────────
+    document.getElementById('process-btn').addEventListener('click', async () => {
+      if (!selectedFiles.length) return;
+      setProcessing(true);
+      hideAlert();
+      resetResult();
+      setStep(1);
+
+      const outputType = document.querySelector('input[name="output"]:checked')?.value || 'excel';
+      lastOutputType = outputType;
+      const formData = new FormData();
+      selectedFiles.forEach(f => formData.append('statements', f));
+      formData.append('outputType', outputType);
+
+      try {
+        setStep(2);
+        const res = await fetch('/api/agent/process', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          body: formData,
+        });
+
+        if (res.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/';
+          return;
+        }
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: 'Unexpected server error' }));
+          throw new Error(err.error || 'Processing failed');
+        }
+
+        setStep(3);
+        resultBlob = await res.blob();
+        setAllDone();
+        showResult(outputType);
+      } catch (err) {
+        showAlert(err.message);
+        setProcessing(false);
+        resetSteps();
+      }
+    });
+
+    // ── Download ─────────────────────────────────────────────────────────────
+    let lastOutputType = 'excel';
+
+    document.getElementById('download-btn').addEventListener('click', () => {
+      if (!resultBlob) return;
+      const date = new Date().toISOString().split('T')[0];
+      const filename = lastOutputType === 'tb_import'
+        ? `trial-balance-${date}.xlsx`
+        : `cra-analysis-${date}.xlsx`;
+      const url = URL.createObjectURL(resultBlob);
+      const a   = document.createElement('a');
+      a.href     = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // ── Reset ────────────────────────────────────────────────────────────────
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      selectedFiles = [];
+      resultBlob    = null;
+      fileInput.value = '';
+      document.getElementById('file-selected').classList.remove('show');
+      document.getElementById('file-list').style.display = 'none';
+      document.getElementById('output-section').style.display = 'none';
+      document.getElementById('process-btn').disabled = true;
+      document.getElementById('process-btn').style.display = '';
+      document.getElementById('reset-btn').style.display = 'none';
+      resetResult();
+      resetSteps();
+      hideAlert();
+    });
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function setStep(n) {
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById(`step-${i}`).className =
+          'step' + (i < n ? ' done' : i === n ? ' active' : '');
+      }
+      document.getElementById('progress-steps').classList.add('show');
+    }
+    function setAllDone() {
+      for (let i = 1; i <= 3; i++) document.getElementById(`step-${i}`).className = 'step done';
+    }
+    function resetSteps() {
+      for (let i = 1; i <= 3; i++) document.getElementById(`step-${i}`).className = 'step';
+      document.getElementById('progress-steps').classList.remove('show');
+    }
+    function showResult(outputType) {
+      const sub = outputType === 'tb_import'
+        ? 'Trial Balance Import — account-coded by CRA category'
+        : 'Bank Reconciliation Worksheet — CRA T2125 categories';
+      document.getElementById('result-sub').textContent = sub;
+      document.getElementById('result-banner').classList.add('show');
+      document.getElementById('process-btn').style.display = 'none';
+      document.getElementById('reset-btn').style.display   = '';
+    }
+    function resetResult() {
+      document.getElementById('result-banner').classList.remove('show');
+      document.getElementById('process-btn').style.display = '';
+      document.getElementById('reset-btn').style.display   = 'none';
+      resultBlob = null;
+    }
+    function setProcessing(on) {
+      const btn = document.getElementById('process-btn');
+      btn.disabled    = on;
+      btn.textContent = on ? 'Processing…' : 'Process Statement';
+    }
+    function showAlert(msg) {
+      const el = document.getElementById('upload-alert');
+      el.textContent = msg;
+      el.classList.add('show');
+    }
+    function hideAlert() {
+      document.getElementById('upload-alert').classList.remove('show');
+    }
+  </script>
+</body>
+</html>

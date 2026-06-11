@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Bulbring AI</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="topbar">
+    <a href="/dashboard.html" class="topbar-brand">
+      <div class="brand-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-5 11.6V16h10v-2.4A7 7 0 0 0 12 2z" fill="rgba(255,255,255,0.95)"/><rect x="9" y="17.5" width="6" height="2" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="9.5" y="20.5" width="5" height="1.5" rx=".75" fill="rgba(255,255,255,0.5)"/></svg>
+      </div>
+      Bulbring AI
+    </a>
+    <div class="topbar-right">
+      <span class="topbar-email" id="user-label"></span>
+      <button class="btn-topbar-logout" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="page-header">
+      <h1>Your Tools</h1>
+      <p>Select a tool to get started</p>
+    </div>
+
+    <div class="tools-grid">
+
+      <div class="tool-card">
+        <div class="tool-icon">🏦</div>
+        <h3>Bank Statement Transaction Tool</h3>
+        <p>Upload a PDF bank statement. AI categorizes every transaction into CRA T2125 expense columns and exports to Excel or a trial balance import.</p>
+        <a href="/bst.html" class="btn btn-primary" style="margin-top: auto;">Open Tool</a>
+      </div>
+
+      <div class="tool-card tool-card--disabled">
+        <div class="tool-icon">🧾</div>
+        <h3>Invoice Generator</h3>
+        <p>Create professional invoices with your business details, line items, HST/GST, and payment terms. Export to PDF.</p>
+        <span class="badge-soon">Coming Soon</span>
+      </div>
+
+      <div class="tool-card tool-card--disabled">
+        <div class="tool-icon">📋</div>
+        <h3>Trial Balance Generator</h3>
+        <p>Upload a trial balance import PDF from the Bank Statement Tool and generate a formatted trial balance report.</p>
+        <span class="badge-soon">Coming Soon</span>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/'; }
+    else { document.getElementById('user-label').textContent = 'Virtualpostman2007'; }
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      window.location.href = '/';
+    });
+  </script>
+</body>
+</html>
