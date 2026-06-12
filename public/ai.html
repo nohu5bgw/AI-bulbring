@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Accountant — Bulbring AI</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .chat-page {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 56px);
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .chat-header {
+      padding: 24px 0 16px;
+      flex-shrink: 0;
+    }
+    .chat-header h1 { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .chat-header p  { font-size: 13px; color: var(--muted); }
+
+    /* Suggested questions */
+    .suggestions {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      padding-bottom: 16px; flex-shrink: 0;
+    }
+    .suggestion {
+      background: #EBF2FB; border: 1px solid #BEE3F8;
+      color: #1B3A6B; font-size: 12px; font-weight: 500;
+      padding: 7px 13px; border-radius: 20px;
+      cursor: pointer; transition: background .15s;
+      white-space: nowrap;
+    }
+    .suggestion:hover { background: #D6E8F7; }
+
+    /* Message list */
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 8px 0 16px;
+      scroll-behavior: smooth;
+    }
+
+    .msg { display: flex; gap: 10px; align-items: flex-start; }
+
+    .msg-avatar {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0; margin-top: 2px;
+    }
+    .msg-avatar.ai   { background: #1B3A6B; color: #fff; font-size: 11px; font-weight: 700; }
+    .msg-avatar.user { background: #EBF2FB; color: #1B3A6B; font-size: 15px; }
+
+    .msg-bubble {
+      max-width: calc(100% - 44px);
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.65;
+      color: #1A202C;
+    }
+    .msg.user .msg-bubble {
+      background: #1B3A6B;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .msg.ai .msg-bubble {
+      background: #fff;
+      border: 1px solid #E2E8F0;
+      border-bottom-left-radius: 4px;
+    }
+    .msg.user { flex-direction: row-reverse; }
+
+    /* Markdown-ish formatting inside AI bubbles */
+    .msg.ai .msg-bubble strong { font-weight: 700; }
+    .msg.ai .msg-bubble em     { font-style: italic; }
+    .msg.ai .msg-bubble code   { background: #EBF2FB; padding: 1px 5px; border-radius: 4px; font-size: 12px; font-family: monospace; }
+    .msg.ai .msg-bubble ul, .msg.ai .msg-bubble ol { padding-left: 18px; margin: 6px 0; }
+    .msg.ai .msg-bubble li     { margin-bottom: 4px; }
+    .msg.ai .msg-bubble p      { margin: 0 0 8px; }
+    .msg.ai .msg-bubble p:last-child { margin-bottom: 0; }
+
+    /* Typing indicator */
+    .typing .msg-bubble {
+      display: flex; align-items: center; gap: 5px; padding: 14px 16px;
+    }
+    .dot {
+      width: 7px; height: 7px; background: #CBD5E0; border-radius: 50%;
+      animation: bounce .9s infinite ease-in-out;
+    }
+    .dot:nth-child(2) { animation-delay: .15s; }
+    .dot:nth-child(3) { animation-delay: .30s; }
+    @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+    /* Input area */
+    .chat-input-wrap {
+      flex-shrink: 0;
+      padding: 12px 0 20px;
+      border-top: 1px solid #E2E8F0;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+    .chat-input {
+      flex: 1;
+      border: 1px solid #CBD5E0;
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-size: 14px;
+      color: #1A202C;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      min-height: 44px;
+      max-height: 140px;
+      line-height: 1.5;
+      transition: border-color .15s;
+      overflow-y: auto;
+    }
+    .chat-input:focus { border-color: #1B3A6B; box-shadow: 0 0 0 3px rgba(27,58,107,.1); }
+    .chat-input::placeholder { color: #A0AEC0; }
+
+    .send-btn {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: #1B3A6B; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background .15s;
+    }
+    .send-btn:hover:not(:disabled) { background: #2a549a; }
+    .send-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    .clear-btn {
+      font-size: 12px; color: #A0AEC0; background: none; border: none;
+      cursor: pointer; padding: 4px 8px; border-radius: 6px;
+      transition: color .15s; align-self: center;
+    }
+    .clear-btn:hover { color: #4A5568; }
+
+    /* Empty state */
+    .empty-state {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 32px;
+      color: var(--muted);
+    }
+    .empty-icon { font-size: 40px; margin-bottom: 14px; }
+    .empty-state h3 { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .empty-state p  { font-size: 14px; max-width: 360px; }
+  </style>
+</head>
+<body>
+
+  <nav class="topbar">
+    <a href="/dashboard.html" class="topbar-brand">
+      <div class="brand-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-5 11.6V16h10v-2.4A7 7 0 0 0 12 2z" fill="rgba(255,255,255,0.95)"/><rect x="9" y="17.5" width="6" height="2" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="9.5" y="20.5" width="5" height="1.5" rx=".75" fill="rgba(255,255,255,0.5)"/></svg>
+      </div>
+      Bulbring AI
+    </a>
+    <div class="topbar-right">
+      <a href="/dashboard.html" style="font-size:13px;color:rgba(255,255,255,.65);text-decoration:none;margin-right:12px;">← Dashboard</a>
+      <button class="btn-topbar-logout" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="chat-page">
+
+    <div class="chat-header">
+      <h1>AI Accountant</h1>
+      <p>Ask anything about Canadian taxes, CRA rules, HST, T2125, deductions, bookkeeping, and more</p>
+    </div>
+
+    <div class="suggestions" id="suggestions">
+      <button class="suggestion" onclick="ask('What meals and entertainment expenses can I deduct?')">Meals & entertainment deductions</button>
+      <button class="suggestion" onclick="ask('How does HST quick method work?')">HST quick method</button>
+      <button class="suggestion" onclick="ask('What vehicle expenses can I claim on my T2125?')">Vehicle expense claims</button>
+      <button class="suggestion" onclick="ask('What is the deadline to file my T1 as a self-employed person?')">Self-employed filing deadline</button>
+      <button class="suggestion" onclick="ask('How do I calculate home office expenses?')">Home office deduction</button>
+      <button class="suggestion" onclick="ask('What records do I need to keep for CRA?')">CRA record keeping</button>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">🧾</div>
+        <h3>Your AI Accountant</h3>
+        <p>Ask me anything about Canadian taxes, CRA rules, HST filings, deductions, T2125, bookkeeping, and more.</p>
+      </div>
+    </div>
+
+    <div class="chat-input-wrap">
+      <textarea class="chat-input" id="chat-input" placeholder="Ask a tax or accounting question…" rows="1"></textarea>
+      <button class="send-btn" id="send-btn" disabled title="Send">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+      <button class="clear-btn" id="clear-btn" title="Clear chat">Clear</button>
+    </div>
+
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('token'); window.location.href = '/';
+    });
+
+    // Conversation history sent to the API each turn
+    let history = [];
+    let isThinking = false;
+
+    const input   = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const msgList = document.getElementById('messages');
+
+    // Auto-grow textarea
+    input.addEventListener('input', () => {
+      sendBtn.disabled = input.value.trim().length === 0 || isThinking;
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 140) + 'px';
+    });
+
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+
+    document.getElementById('clear-btn').addEventListener('click', () => {
+      history = [];
+      msgList.innerHTML = `
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">🧾</div>
+          <h3>Your AI Accountant</h3>
+          <p>Ask me anything about Canadian taxes, CRA rules, HST filings, deductions, T2125, bookkeeping, and more.</p>
+        </div>`;
+      document.getElementById('suggestions').style.display = 'flex';
+    });
+
+    function ask(text) {
+      input.value = text;
+      input.dispatchEvent(new Event('input'));
+      sendMessage();
+    }
+
+    function scrollBottom() {
+      msgList.scrollTop = msgList.scrollHeight;
+    }
+
+    function appendMsg(role, html) {
+      const empty = document.getElementById('empty-state');
+      if (empty) empty.remove();
+      document.getElementById('suggestions').style.display = 'none';
+
+      const div = document.createElement('div');
+      div.className = `msg ${role}`;
+      const avatar = role === 'ai'
+        ? `<div class="msg-avatar ai">AI</div>`
+        : `<div class="msg-avatar user">👤</div>`;
+      div.innerHTML = `${avatar}<div class="msg-bubble">${html}</div>`;
+      msgList.appendChild(div);
+      scrollBottom();
+      return div;
+    }
+
+    function appendTyping() {
+      const div = document.createElement('div');
+      div.className = 'msg ai typing';
+      div.id = 'typing-indicator';
+      div.innerHTML = `<div class="msg-avatar ai">AI</div><div class="msg-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+      msgList.appendChild(div);
+      scrollBottom();
+    }
+
+    function removeTyping() {
+      document.getElementById('typing-indicator')?.remove();
+    }
+
+    // Very simple markdown → HTML (bold, italic, code, lists, line breaks)
+    function mdToHtml(text) {
+      return text
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/^###\s+(.+)$/gm, '<strong>$1</strong>')
+        .replace(/^##\s+(.+)$/gm,  '<strong>$1</strong>')
+        .replace(/^#\s+(.+)$/gm,   '<strong>$1</strong>')
+        .replace(/^[-•]\s+(.+)$/gm, '<li>$1</li>')
+        .replace(/^(\d+)\.\s+(.+)$/gm, '<li>$2</li>')
+        .replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`)
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>')
+        .replace(/^(.+)$/, '<p>$1</p>')
+        .replace(/<p><\/p>/g,'');
+    }
+
+    async function sendMessage() {
+      const text = input.value.trim();
+      if (!text || isThinking) return;
+
+      isThinking = true;
+      input.value = '';
+      input.style.height = 'auto';
+      sendBtn.disabled = true;
+
+      appendMsg('user', text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+      history.push({ role: 'user', content: text });
+
+      appendTyping();
+
+      try {
+        const res = await fetch('/api/ai/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + token,
+          },
+          body: JSON.stringify({ messages: history }),
+        });
+
+        removeTyping();
+
+        if (res.status === 401) { localStorage.removeItem('token'); window.location.href = '/'; return; }
+
+        const data = await res.json();
+        if (!res.ok) {
+          appendMsg('ai', `<em style="color:#C53030">${data.error || 'Something went wrong. Please try again.'}</em>`);
+        } else {
+          const reply = data.reply || '';
+          history.push({ role: 'assistant', content: reply });
+          appendMsg('ai', mdToHtml(reply));
+        }
+      } catch {
+        removeTyping();
+        appendMsg('ai', '<em style="color:#C53030">Could not connect to server. Please try again.</em>');
+      }
+
+      isThinking = false;
+      sendBtn.disabled = input.value.trim().length === 0;
+    }
+  </script>
+</body>
+</html>
