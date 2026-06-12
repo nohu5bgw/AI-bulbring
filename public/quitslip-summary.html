@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuitSlip Summary — Bulbring AI</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .qs-page { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    /* ── Hero ─────────────────────────────────────────────────────── */
+    .qs-hero {
+      background: linear-gradient(135deg, #1E40AF 0%, #2563EB 60%, #3B82F6 100%);
+      border-radius: 20px;
+      padding: 52px 48px;
+      color: #fff;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .qs-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 70% at 90% 20%, rgba(255,255,255,.08) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .qs-eyebrow {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.22);
+      font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+      padding: 5px 12px; border-radius: 6px; margin-bottom: 22px;
+    }
+    .qs-eyebrow-dot { width: 6px; height: 6px; background: #93C5FD; border-radius: 50%; }
+    .qs-hero h1 {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 800; letter-spacing: -1.5px; line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .qs-hero p {
+      font-size: 17px; line-height: 1.7; color: rgba(255,255,255,.8);
+      max-width: 520px; margin-bottom: 32px;
+    }
+    .qs-hero-stats {
+      display: flex; gap: 36px; flex-wrap: wrap;
+      padding-top: 28px; border-top: 1px solid rgba(255,255,255,.18);
+    }
+    .qs-stat-n { font-size: 28px; font-weight: 700; letter-spacing: -1px; }
+    .qs-stat-l { font-size: 12px; color: rgba(255,255,255,.6); margin-top: 3px; font-weight: 500; }
+
+    /* ── Section titles ───────────────────────────────────────────── */
+    .qs-section { margin-bottom: 40px; }
+    .qs-section-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+      text-transform: uppercase; color: #2563EB; margin-bottom: 12px;
+    }
+    .qs-section h2 {
+      font-size: 26px; font-weight: 700; letter-spacing: -0.8px;
+      color: var(--text); margin-bottom: 14px;
+    }
+    .qs-section p {
+      font-size: 15px; line-height: 1.75; color: var(--muted);
+    }
+
+    /* ── Cards grid ───────────────────────────────────────────────── */
+    .qs-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+    .qs-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 20px; }
+    @media (max-width: 640px) {
+      .qs-grid-2, .qs-grid-3 { grid-template-columns: 1fr; }
+      .qs-hero { padding: 36px 24px; }
+    }
+
+    .qs-card {
+      background: var(--card-bg, #fff);
+      border: 1px solid var(--border-color, #E2E8F0);
+      border-radius: 14px;
+      padding: 24px 22px;
+    }
+    .qs-card-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #EFF6FF; display: flex; align-items: center;
+      justify-content: center; font-size: 20px; margin-bottom: 14px;
+    }
+    .qs-card h3 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .qs-card p  { font-size: 13px; line-height: 1.65; color: var(--muted); }
+
+    /* ── Problem / Solution split ─────────────────────────────────── */
+    .qs-split {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px;
+    }
+    @media (max-width: 640px) { .qs-split { grid-template-columns: 1fr; } }
+
+    .qs-problem {
+      background: #FFF5F5; border: 1px solid #FED7D7;
+      border-radius: 14px; padding: 28px 24px;
+    }
+    .qs-problem .qs-pill {
+      display: inline-block; background: #FEB2B2; color: #742A2A;
+      font-size: 11px; font-weight: 700; letter-spacing: .6px;
+      padding: 3px 10px; border-radius: 6px; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .qs-problem h3 { font-size: 17px; font-weight: 700; color: #742A2A; margin-bottom: 10px; }
+    .qs-problem ul { padding-left: 18px; display: flex; flex-direction: column; gap: 8px; }
+    .qs-problem li { font-size: 14px; color: #9B2C2C; line-height: 1.5; }
+
+    .qs-solution {
+      background: #EFF6FF; border: 1px solid #BFDBFE;
+      border-radius: 14px; padding: 28px 24px;
+    }
+    .qs-solution .qs-pill {
+      display: inline-block; background: #BFDBFE; color: #1E40AF;
+      font-size: 11px; font-weight: 700; letter-spacing: .6px;
+      padding: 3px 10px; border-radius: 6px; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .qs-solution h3 { font-size: 17px; font-weight: 700; color: #1E40AF; margin-bottom: 10px; }
+    .qs-solution ul { padding-left: 18px; display: flex; flex-direction: column; gap: 8px; }
+    .qs-solution li { font-size: 14px; color: #1D4ED8; line-height: 1.5; }
+
+    /* ── How it works ─────────────────────────────────────────────── */
+    .qs-steps {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; margin-top: 20px;
+      align-items: start;
+    }
+    @media (max-width: 640px) { .qs-steps { grid-template-columns: 1fr; gap: 16px; } }
+    .qs-step { text-align: center; padding: 0 12px; position: relative; }
+    .qs-step:not(:last-child)::after {
+      content: '→';
+      position: absolute; top: 20px; right: -6px;
+      font-size: 18px; color: #93C5FD; font-weight: 300;
+    }
+    @media (max-width: 640px) { .qs-step::after { display: none; } }
+    .qs-step-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: #2563EB; display: flex; align-items: center;
+      justify-content: center; font-size: 24px; margin: 0 auto 16px;
+      box-shadow: 0 6px 20px rgba(37,99,235,.25);
+    }
+    .qs-step-num {
+      font-size: 11px; font-weight: 700; color: #2563EB;
+      letter-spacing: .8px; text-transform: uppercase; margin-bottom: 6px;
+    }
+    .qs-step h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .qs-step p  { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* ── Divider ──────────────────────────────────────────────────── */
+    .qs-divider { border: none; border-top: 1px solid #E2E8F0; margin: 40px 0; }
+
+    /* ── Market / traction ────────────────────────────────────────── */
+    .qs-highlight {
+      background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+      border-radius: 16px; padding: 36px 40px; color: #fff;
+      margin-top: 20px;
+    }
+    .qs-highlight h2 {
+      font-size: 22px; font-weight: 700; letter-spacing: -0.5px;
+      margin-bottom: 24px; color: #fff;
+    }
+    .qs-highlight-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+    @media (max-width: 640px) { .qs-highlight-grid { grid-template-columns: 1fr; gap: 16px; } }
+    .qs-hstat { }
+    .qs-hstat-n { font-size: 30px; font-weight: 700; color: #60A5FA; letter-spacing: -1.2px; }
+    .qs-hstat-l { font-size: 13px; color: rgba(255,255,255,.55); margin-top: 4px; line-height: 1.4; }
+
+    /* ── CTA strip ────────────────────────────────────────────────── */
+    .qs-cta {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+      background: #EFF6FF; border: 1px solid #BFDBFE;
+      border-radius: 14px; padding: 24px 28px;
+      margin-top: 40px;
+    }
+    .qs-cta-text h3 { font-size: 17px; font-weight: 700; color: #1E3A8A; margin-bottom: 4px; }
+    .qs-cta-text p  { font-size: 13px; color: #3B82F6; }
+    .qs-cta-btn {
+      background: #2563EB; color: #fff;
+      font-size: 14px; font-weight: 600;
+      padding: 12px 22px; border-radius: 10px; text-decoration: none;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .qs-cta-btn:hover { background: #1D4ED8; }
+  </style>
+</head>
+<body>
+
+  <nav class="topbar">
+    <a href="/dashboard.html" class="topbar-brand">
+      <div class="brand-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-5 11.6V16h10v-2.4A7 7 0 0 0 12 2z" fill="rgba(255,255,255,0.95)"/><rect x="9" y="17.5" width="6" height="2" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="9.5" y="20.5" width="5" height="1.5" rx=".75" fill="rgba(255,255,255,0.5)"/></svg>
+      </div>
+      Bulbring AI
+    </a>
+    <div class="topbar-right">
+      <a href="/dashboard.html" style="font-size:13px;color:rgba(255,255,255,.65);text-decoration:none;margin-right:12px;">← Dashboard</a>
+      <button class="btn-topbar-logout" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="qs-page">
+
+      <!-- Hero -->
+      <div class="qs-hero">
+        <div class="qs-eyebrow"><span class="qs-eyebrow-dot"></span> Pitch Deck &amp; Summary</div>
+        <h1>Quit<span style="opacity:.75">slip</span></h1>
+        <p>Digital receipts delivered via NFC. Customers tap a sticker at checkout and their receipt appears on their phone instantly — no app, no paper, no friction.</p>
+        <div class="qs-hero-stats">
+          <div>
+            <div class="qs-stat-n">11B+</div>
+            <div class="qs-stat-l">Paper receipts printed<br>in North America per year</div>
+          </div>
+          <div>
+            <div class="qs-stat-n">0</div>
+            <div class="qs-stat-l">App downloads<br>required by customers</div>
+          </div>
+          <div>
+            <div class="qs-stat-n">&lt;1s</div>
+            <div class="qs-stat-l">Time to receive<br>a digital receipt</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Problem / Solution -->
+      <div class="qs-section">
+        <div class="qs-section-title">The Opportunity</div>
+        <h2>Paper receipts are broken. We fixed them.</h2>
+        <div class="qs-split">
+          <div class="qs-problem">
+            <div class="qs-pill">The Problem</div>
+            <h3>Paper receipts fail everyone</h3>
+            <ul>
+              <li>Wasteful — BPA-coated thermal paper, non-recyclable</li>
+              <li>Customers lose them immediately</li>
+              <li>Email receipts get ignored and clog inboxes</li>
+              <li>Merchants pay for paper rolls constantly</li>
+              <li>No data — zero insight into customer behaviour</li>
+            </ul>
+          </div>
+          <div class="qs-solution">
+            <div class="qs-pill">The Solution</div>
+            <h3>QuitSlip — tap and done</h3>
+            <ul>
+              <li>NFC sticker at checkout — customer taps their phone</li>
+              <li>Receipt opens instantly in the browser, no app needed</li>
+              <li>Saved, shareable, downloadable as an image</li>
+              <li>Zero paper, zero ink, zero recurring supply cost</li>
+              <li>Merchant gets anonymized transaction data</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <hr class="qs-divider" />
+
+      <!-- How it works -->
+      <div class="qs-section">
+        <div class="qs-section-title">How It Works</div>
+        <h2>Three steps. That's it.</h2>
+        <div class="qs-steps">
+          <div class="qs-step">
+            <div class="qs-step-icon">🏷️</div>
+            <div class="qs-step-num">Step 1</div>
+            <h3>Merchant places sticker</h3>
+            <p>A pre-programmed NFC sticker is placed at the till or on the card reader. One-time setup, no hardware changes.</p>
+          </div>
+          <div class="qs-step">
+            <div class="qs-step-icon">📲</div>
+            <div class="qs-step-num">Step 2</div>
+            <h3>Customer taps</h3>
+            <p>After paying, the customer taps their phone on the sticker. Any modern iPhone or Android works — no app required.</p>
+          </div>
+          <div class="qs-step">
+            <div class="qs-step-icon">🧾</div>
+            <div class="qs-step-num">Step 3</div>
+            <h3>Receipt appears</h3>
+            <p>A fully itemized digital receipt loads in the browser in under a second. Save it, screenshot it, or share it.</p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="qs-divider" />
+
+      <!-- For merchants / for customers -->
+      <div class="qs-section">
+        <div class="qs-section-title">Why It Wins</div>
+        <h2>Value for both sides of the counter</h2>
+        <div class="qs-grid-2">
+          <div class="qs-card">
+            <div class="qs-card-icon">🏪</div>
+            <h3>For Merchants</h3>
+            <p>Eliminate paper roll costs, reduce printer maintenance, and get clean transaction data from every tap. Works alongside your existing POS — no integration needed to get started.</p>
+          </div>
+          <div class="qs-card">
+            <div class="qs-card-icon">👤</div>
+            <h3>For Customers</h3>
+            <p>No app to download, no account to create. Receipts are stored on the device, easy to screenshot, and available for returns. A genuinely better experience in seconds.</p>
+          </div>
+          <div class="qs-card">
+            <div class="qs-card-icon">🌱</div>
+            <h3>Sustainability</h3>
+            <p>The average retail location prints 15,000+ receipts a year. QuitSlip eliminates that waste entirely — no thermal paper, no BPA, no landfill.</p>
+          </div>
+          <div class="qs-card">
+            <div class="qs-card-icon">⚡</div>
+            <h3>Zero Friction Adoption</h3>
+            <p>Unlike QR codes or email receipts, there's nothing to opt into. The sticker works with every modern smartphone out of the box, including offline-capable receipts.</p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="qs-divider" />
+
+      <!-- Market -->
+      <div class="qs-section">
+        <div class="qs-section-title">Market Opportunity</div>
+        <h2>A massive, underserved market</h2>
+        <div class="qs-highlight">
+          <h2>The numbers</h2>
+          <div class="qs-highlight-grid">
+            <div class="qs-hstat">
+              <div class="qs-hstat-n">$4.2B</div>
+              <div class="qs-hstat-l">Global digital receipt market size by 2028</div>
+            </div>
+            <div class="qs-hstat">
+              <div class="qs-hstat-n">2.3M</div>
+              <div class="qs-hstat-l">Retail &amp; food-service locations in Canada &amp; US</div>
+            </div>
+            <div class="qs-hstat">
+              <div class="qs-hstat-n">$8–15</div>
+              <div class="qs-hstat-l">Monthly SaaS per location — low friction, high LTV</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Business model -->
+      <div class="qs-section">
+        <div class="qs-section-title">Business Model</div>
+        <h2>Simple SaaS + hardware margin</h2>
+        <div class="qs-grid-3">
+          <div class="qs-card">
+            <div class="qs-card-icon">💳</div>
+            <h3>Monthly Subscription</h3>
+            <p>Merchants pay a flat monthly fee per location. Pricing from $9/mo for independent retailers up to enterprise volume pricing.</p>
+          </div>
+          <div class="qs-card">
+            <div class="qs-card-icon">📦</div>
+            <h3>NFC Sticker Kits</h3>
+            <p>Starter kits sold at onboarding include pre-programmed stickers, mounting hardware, and a setup guide. Hardware margin on every kit.</p>
+          </div>
+          <div class="qs-card">
+            <div class="qs-card-icon">📊</div>
+            <h3>Data &amp; Analytics</h3>
+            <p>Aggregated, anonymized purchase data sold as an add-on. Merchants gain insight into peak times, basket size, and repeat visits.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="qs-cta">
+        <div class="qs-cta-text">
+          <h3>See it in action</h3>
+          <p>Watch a live receipt load in under a second — no app, no signup.</p>
+        </div>
+        <a href="/quitslip-demo.html" class="qs-cta-btn">View Demo →</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      window.location.href = '/';
+    });
+  </script>
+</body>
+</html>

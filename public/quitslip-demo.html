@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuitSlip Demo — Bulbring AI</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .demo-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 24px 60px;
+    }
+    .demo-intro {
+      max-width: 520px;
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .demo-intro h2 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+    .demo-intro p {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .phone-shell {
+      width: 360px;
+      max-width: 100%;
+      height: 760px;
+      border-radius: 44px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 10px #1a1a1a,
+        0 0 0 12px #2a2a2a,
+        0 40px 80px rgba(0,0,0,.22),
+        0 12px 32px rgba(0,0,0,.14);
+      background: #111;
+      position: relative;
+    }
+    .phone-shell::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 110px; height: 30px;
+      background: #1a1a1a;
+      border-radius: 0 0 20px 20px;
+      z-index: 10;
+    }
+    .phone-shell iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 34px;
+      background: #fff;
+    }
+    .reload-btn {
+      margin-top: 28px;
+      background: #2563EB;
+      color: #fff;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 11px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .reload-btn:hover { background: #1D4ED8; }
+  </style>
+</head>
+<body>
+
+  <nav class="topbar">
+    <a href="/dashboard.html" class="topbar-brand">
+      <div class="brand-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-5 11.6V16h10v-2.4A7 7 0 0 0 12 2z" fill="rgba(255,255,255,0.95)"/><rect x="9" y="17.5" width="6" height="2" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="9.5" y="20.5" width="5" height="1.5" rx=".75" fill="rgba(255,255,255,0.5)"/></svg>
+      </div>
+      Bulbring AI
+    </a>
+    <div class="topbar-right">
+      <a href="/dashboard.html" style="font-size:13px;color:rgba(255,255,255,.65);text-decoration:none;margin-right:12px;">← Dashboard</a>
+      <button class="btn-topbar-logout" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="demo-wrap">
+      <div class="demo-intro">
+        <h2>QuitSlip — Live Demo</h2>
+        <p>This is what a customer sees when they tap the NFC sticker at checkout. No app download, no login — just tap and the receipt appears instantly.</p>
+      </div>
+
+      <div class="phone-shell">
+        <iframe id="demo-frame" src="https://quitslip.com/demo.html" title="QuitSlip Demo" allow="accelerometer; autoplay; clipboard-write" loading="lazy"></iframe>
+      </div>
+
+      <button class="reload-btn" onclick="document.getElementById('demo-frame').src = document.getElementById('demo-frame').src">
+        ↺ Replay Demo
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      window.location.href = '/';
+    });
+  </script>
+</body>
+</html>
