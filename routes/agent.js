@@ -5,6 +5,7 @@ const { extractTextFromPDF } = require('../lib/pdfParser');
 const { analyzeBankStatement } = require('../lib/craAgent');
 const { buildExcel } = require('../lib/excelBuilder');
 const { buildTrialBalance } = require('../lib/trialBalanceBuilder');
+const history = require('../lib/historyManager');
 
 const router = express.Router();
 
@@ -86,6 +87,16 @@ router.post('/process', requireAuth, upload.array('statements', 20), async (req,
     const filename = isTB
       ? `trial-balance-${new Date().toISOString().split('T')[0]}.xlsx`
       : `cra-analysis-${new Date().toISOString().split('T')[0]}.xlsx`;
+
+    const txCount = mergedAnalysis.transactions.length;
+    const period  = [mergedAnalysis.period.start, mergedAnalysis.period.end].filter(Boolean).join(' – ');
+    history.save(
+      isTB ? 'bst_tb' : 'bst',
+      isTB ? 'BST — TB Import' : 'Bank Statement Analysis',
+      filename,
+      `${txCount} transactions${period ? ' · ' + period : ''}`,
+      excelBuffer,
+    );
 
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

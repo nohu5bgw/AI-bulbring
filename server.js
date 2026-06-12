@@ -9,6 +9,10 @@ const agentRouter   = require('./routes/agent');
 const authRouter    = require('./routes/auth');
 const invoiceRouter = require('./routes/invoice');
 const tbRouter      = require('./routes/tb');
+const historyRouter = require('./routes/history');
+const plRouter      = require('./routes/pl');
+const hstRouter     = require('./routes/hst');
+const receiptRouter = require('./routes/receipt');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -58,16 +62,23 @@ const expensiveLimiter = rateLimit({
 });
 
 app.use('/api/', generalLimiter);
-app.use('/api/agent',              expensiveLimiter);
-app.use('/api/tb/generate-from-file', expensiveLimiter);
-app.use('/api/invoice/generate',   expensiveLimiter);
-app.use('/api/tb/generate',        expensiveLimiter);
+app.use('/api/agent',                  expensiveLimiter);
+app.use('/api/tb/generate-from-file',  expensiveLimiter);
+app.use('/api/invoice/generate',       expensiveLimiter);
+app.use('/api/tb/generate',            expensiveLimiter);
+app.use('/api/receipt/scan',           expensiveLimiter);
+app.use('/api/pl/generate',            expensiveLimiter);
+app.use('/api/hst/generate',           expensiveLimiter);
 
 // API routes
 app.use('/api/auth',    authRouter);
 app.use('/api/agent',  agentRouter);
 app.use('/api/invoice', invoiceRouter);
 app.use('/api/tb',      tbRouter);
+app.use('/api/history', historyRouter);
+app.use('/api/pl',      plRouter);
+app.use('/api/hst',     hstRouter);
+app.use('/api/receipt', receiptRouter);
 
 // Serve frontend
 app.use(express.static(path.join(__dirname, 'public')));

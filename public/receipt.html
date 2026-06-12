@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Receipt Scanner — Bulbring AI</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .scanner-wrap { max-width: 680px; margin: 0 auto; }
+
+    /* Upload zone */
+    .drop-zone {
+      border: 2px dashed #CBD5E0;
+      border-radius: 14px;
+      padding: 48px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      background: #FAFBFC;
+      position: relative;
+    }
+    .drop-zone.dragover { border-color: #4299E1; background: #EBF8FF; }
+    .drop-zone input[type=file] { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
+    .drop-icon { font-size: 44px; margin-bottom: 14px; }
+    .drop-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .drop-sub   { font-size: 13px; color: var(--muted); }
+
+    /* Preview */
+    #preview-wrap { display: none; text-align: center; margin-top: 20px; }
+    #preview-img  { max-width: 100%; max-height: 320px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,.12); }
+    .change-btn { margin-top: 12px; background: none; border: 1px solid #CBD5E0; border-radius: 8px; padding: 7px 16px; font-size: 13px; cursor: pointer; color: var(--muted); }
+    .change-btn:hover { border-color: #A0AEC0; color: var(--text); }
+
+    /* Scan button */
+    #scan-btn {
+      display: none; width: 100%; margin-top: 20px;
+      background: var(--primary, #1B3A6B); color: #fff;
+      border: none; border-radius: 10px; padding: 14px;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: background .15s;
+    }
+    #scan-btn:hover:not(:disabled) { background: #2a549a; }
+    #scan-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* Progress */
+    #progress { display: none; text-align: center; margin-top: 24px; }
+    .spinner {
+      width: 36px; height: 36px; border: 3px solid #E2E8F0;
+      border-top-color: #1B3A6B; border-radius: 50%;
+      animation: spin .7s linear infinite; margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Result card */
+    #result-wrap { display: none; margin-top: 28px; }
+    .result-card {
+      background: #fff; border: 1px solid #E2E8F0;
+      border-radius: 14px; overflow: hidden;
+    }
+    .result-header {
+      background: #1B3A6B; color: #fff;
+      padding: 18px 24px;
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .result-merchant { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+    .result-meta     { font-size: 13px; color: rgba(255,255,255,.65); margin-top: 4px; }
+    .result-total    { font-size: 26px; font-weight: 700; letter-spacing: -1px; }
+
+    .result-body { padding: 20px 24px; }
+
+    .items-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }
+    .items-table th { text-align: left; font-size: 11px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: .5px; padding-bottom: 8px; border-bottom: 1px solid #E2E8F0; }
+    .items-table td { padding: 8px 0; border-bottom: 1px solid #F7FAFC; color: #2D3748; }
+    .items-table td:last-child { text-align: right; font-weight: 500; }
+
+    .subtotals { display: flex; flex-direction: column; gap: 4px; font-size: 13px; margin-bottom: 16px; }
+    .sub-row { display: flex; justify-content: space-between; color: #718096; }
+    .sub-row.total { color: #1A202C; font-weight: 700; font-size: 15px; border-top: 1px solid #E2E8F0; padding-top: 8px; margin-top: 4px; }
+
+    .cat-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: #EBF8FF; border: 1px solid #BEE3F8;
+      border-radius: 8px; padding: 8px 14px;
+      font-size: 13px; font-weight: 600; color: #2B6CB0;
+      margin-bottom: 10px;
+    }
+    .cat-badge.review { background: #FFF5F5; border-color: #FED7D7; color: #C53030; }
+    .cat-reason { font-size: 12px; color: #718096; margin-bottom: 16px; }
+
+    .result-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .dl-btn {
+      flex: 1; min-width: 140px;
+      background: #1B3A6B; color: #fff; border: none; border-radius: 9px;
+      padding: 11px 18px; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: background .15s;
+    }
+    .dl-btn:hover { background: #2a549a; }
+    .scan-another {
+      flex: 1; min-width: 140px;
+      background: #F7FAFC; color: #2D3748; border: 1px solid #E2E8F0; border-radius: 9px;
+      padding: 11px 18px; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: background .15s;
+    }
+    .scan-another:hover { background: #EDF2F7; }
+
+    .alert { display:none; margin-top:16px; padding:12px 16px; border-radius:9px; font-size:13px; }
+    .alert.show { display:block; }
+    .alert-error { background:#FFF5F5; border:1px solid #FEB2B2; color:#C53030; }
+  </style>
+</head>
+<body>
+
+  <nav class="topbar">
+    <a href="/dashboard.html" class="topbar-brand">
+      <div class="brand-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-5 11.6V16h10v-2.4A7 7 0 0 0 12 2z" fill="rgba(255,255,255,0.95)"/><rect x="9" y="17.5" width="6" height="2" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="9.5" y="20.5" width="5" height="1.5" rx=".75" fill="rgba(255,255,255,0.5)"/></svg>
+      </div>
+      Bulbring AI
+    </a>
+    <div class="topbar-right">
+      <a href="/dashboard.html" style="font-size:13px;color:rgba(255,255,255,.65);text-decoration:none;margin-right:12px;">← Dashboard</a>
+      <button class="btn-topbar-logout" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="page-header">
+      <h1>Receipt Scanner</h1>
+      <p>Take a photo of any receipt — AI reads every line and assigns the correct CRA category</p>
+    </div>
+
+    <div class="scanner-wrap">
+
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp,image/gif" />
+        <div class="drop-icon">📷</div>
+        <div class="drop-title">Drop a receipt photo here</div>
+        <div class="drop-sub">or click to browse &nbsp;·&nbsp; JPEG, PNG, WebP</div>
+      </div>
+
+      <div id="preview-wrap">
+        <img id="preview-img" src="" alt="Receipt preview" />
+        <br/>
+        <button class="change-btn" onclick="reset()">Change photo</button>
+      </div>
+
+      <button id="scan-btn" onclick="scan()">Scan Receipt →</button>
+
+      <div class="alert alert-error" id="alert"></div>
+
+      <div id="progress">
+        <div class="spinner"></div>
+        <div style="font-size:14px;color:var(--muted);">Reading receipt with AI…</div>
+      </div>
+
+      <div id="result-wrap"></div>
+
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      window.location.href = '/';
+    });
+
+    let currentFile = null;
+    let currentResult = null;
+
+    const dropZone  = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const scanBtn   = document.getElementById('scan-btn');
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) setFile(fileInput.files[0]);
+    });
+
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+    });
+
+    function setFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showAlert('Please upload a JPEG, PNG, or WebP image.');
+        return;
+      }
+      currentFile = file;
+      hideAlert();
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('preview-img').src = e.target.result;
+        document.getElementById('drop-zone').style.display   = 'none';
+        document.getElementById('preview-wrap').style.display = 'block';
+        scanBtn.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function reset() {
+      currentFile = null;
+      currentResult = null;
+      document.getElementById('drop-zone').style.display    = 'block';
+      document.getElementById('preview-wrap').style.display = 'none';
+      document.getElementById('result-wrap').style.display  = 'none';
+      document.getElementById('progress').style.display     = 'none';
+      scanBtn.style.display = 'none';
+      fileInput.value = '';
+      hideAlert();
+    }
+
+    function showAlert(msg) {
+      const el = document.getElementById('alert');
+      el.textContent = msg;
+      el.className = 'alert alert-error show';
+    }
+    function hideAlert() {
+      document.getElementById('alert').className = 'alert';
+    }
+
+    function fmt(n) {
+      return n != null ? '$' + Number(n).toFixed(2) : '—';
+    }
+
+    async function scan() {
+      if (!currentFile) return;
+      scanBtn.disabled = true;
+      scanBtn.textContent = 'Scanning…';
+      document.getElementById('progress').style.display    = 'block';
+      document.getElementById('result-wrap').style.display = 'none';
+      hideAlert();
+
+      const fd = new FormData();
+      fd.append('receipt', currentFile);
+
+      try {
+        const res  = await fetch('/api/receipt/scan', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + token },
+          body: fd,
+        });
+        const data = await res.json();
+
+        document.getElementById('progress').style.display = 'none';
+        scanBtn.disabled    = false;
+        scanBtn.textContent = 'Scan Receipt →';
+
+        if (!res.ok) { showAlert(data.error || 'Scan failed'); return; }
+
+        currentResult = data;
+        renderResult(data);
+
+      } catch {
+        document.getElementById('progress').style.display = 'none';
+        scanBtn.disabled    = false;
+        scanBtn.textContent = 'Scan Receipt →';
+        showAlert('Could not connect to server');
+      }
+    }
+
+    function renderResult(data) {
+      const p = data.parsed;
+      const items = (p.items || []).map(it => `
+        <tr>
+          <td>${it.name || ''}</td>
+          <td style="text-align:right;color:#718096;">${it.quantity || 1} × ${fmt(it.unit_price)}</td>
+          <td>${fmt(it.total)}</td>
+        </tr>
+      `).join('');
+
+      const subtotals = [
+        ['Subtotal', p.subtotal],
+        ['Tax', p.tax],
+        ...(p.tip ? [['Tip', p.tip]] : []),
+      ].filter(([,v]) => v).map(([l,v]) => `<div class="sub-row"><span>${l}</span><span>${fmt(v)}</span></div>`).join('');
+
+      const address = [p.address, p.time ? `${p.date || ''} ${p.time}` : p.date].filter(Boolean).join(' · ');
+      const catCls  = p.needs_review ? 'cat-badge review' : 'cat-badge';
+      const catIcon = p.needs_review ? '⚠' : '✓';
+
+      document.getElementById('result-wrap').innerHTML = `
+        <div class="result-card">
+          <div class="result-header">
+            <div>
+              <div class="result-merchant">${p.merchant || 'Receipt'}</div>
+              <div class="result-meta">${address || ''}</div>
+            </div>
+            <div class="result-total">${fmt(p.total)}</div>
+          </div>
+          <div class="result-body">
+            ${items ? `
+              <table class="items-table">
+                <thead><tr><th>Item</th><th style="text-align:right">Qty &amp; Price</th><th style="text-align:right">Amount</th></tr></thead>
+                <tbody>${items}</tbody>
+              </table>
+            ` : ''}
+            <div class="subtotals">
+              ${subtotals}
+              <div class="sub-row total"><span>Total</span><span>${fmt(p.total)}</span></div>
+            </div>
+            <div class="${catCls}">${catIcon} ${data.categoryLabel || p.category}</div>
+            ${p.category_reason ? `<div class="cat-reason">${p.category_reason}</div>` : ''}
+            <div class="result-actions">
+              <button class="dl-btn" onclick="downloadExcel()">↓ Download Excel</button>
+              <button class="scan-another" onclick="reset()">Scan another receipt</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('result-wrap').style.display = 'block';
+    }
+
+    async function downloadExcel() {
+      if (!currentFile) return;
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = 'Downloading…';
+
+      const fd = new FormData();
+      fd.append('receipt', currentFile);
+
+      try {
+        const res = await fetch('/api/receipt/download', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + token },
+          body: fd,
+        });
+        if (!res.ok) { btn.disabled = false; btn.textContent = '↓ Download Excel'; return; }
+        const blob     = await res.blob();
+        const filename = currentResult?.excelFilename || 'receipt.xlsx';
+        const url      = URL.createObjectURL(blob);
+        const a        = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        btn.disabled = false;
+        btn.textContent = '↓ Download Excel';
+      } catch {
+        btn.disabled = false;
+        btn.textContent = '↓ Download Excel';
+      }
+    }
+  </script>
+</body>
+</html>

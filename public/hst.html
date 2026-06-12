@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HST Return — Bulbring AI</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .hst-wrap { max-width: 640px; margin: 0 auto; }
+    .form-section { margin-bottom: 28px; }
+    .form-section h3 {
+      font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .8px; color: #1B3A6B;
+      border-bottom: 2px solid #EBF2FB; padding-bottom: 10px; margin-bottom: 18px;
+    }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 520px) { .field-row { grid-template-columns: 1fr; } }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 12px; font-weight: 600; color: #4A5568; }
+    .field input, .field select {
+      border: 1px solid #CBD5E0; border-radius: 8px;
+      padding: 9px 12px; font-size: 14px; color: #1A202C;
+      background: #fff; outline: none; transition: border-color .15s;
+    }
+    .field input[type=number] { text-align: right; }
+    .field input:focus, .field select:focus { border-color: #1B3A6B; box-shadow: 0 0 0 3px rgba(27,58,107,.1); }
+    .toggle-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; background: #F7FAFC;
+      border: 1px solid #E2E8F0; border-radius: 9px;
+      cursor: pointer; user-select: none;
+    }
+    .toggle-row input[type=checkbox] { width: 16px; height: 16px; accent-color: #1B3A6B; cursor: pointer; }
+    .toggle-row label { font-size: 14px; font-weight: 500; color: #2D3748; cursor: pointer; }
+    .toggle-row small { font-size: 12px; color: #718096; display: block; margin-top: 2px; }
+    #quick-fields { display: none; margin-top: 14px; }
+
+    /* Live preview */
+    .preview-card {
+      background: #fff; border: 1px solid #E2E8F0; border-radius: 12px;
+      overflow: hidden; margin-bottom: 28px;
+    }
+    .preview-header { background: #1B3A6B; padding: 14px 18px; color: #fff; font-size: 13px; font-weight: 600; }
+    .preview-body { padding: 16px 18px; }
+    .preview-row {
+      display: flex; justify-content: space-between;
+      font-size: 13px; padding: 6px 0;
+      border-bottom: 1px solid #F7FAFC;
+    }
+    .preview-row:last-child { border-bottom: none; }
+    .preview-row span:first-child { color: #4A5568; }
+    .preview-row span:last-child  { font-weight: 600; color: #1A202C; }
+    .preview-row.owing  span:last-child { color: #C53030; font-size: 16px; }
+    .preview-row.refund span:last-child { color: #047857; font-size: 16px; }
+
+    .generate-btn {
+      width: 100%; background: #1B3A6B; color: #fff;
+      border: none; border-radius: 10px; padding: 14px;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: background .15s;
+    }
+    .generate-btn:hover:not(:disabled) { background: #2a549a; }
+    .generate-btn:disabled { opacity: .6; cursor: not-allowed; }
+    .alert { display:none; margin-top:16px; padding:12px 16px; border-radius:9px; font-size:13px; }
+    .alert.show { display:block; }
+    .alert-error   { background:#FFF5F5; border:1px solid #FEB2B2; color:#C53030; }
+    .alert-success { background:#F0FFF4; border:1px solid #9AE6B4; color:#276749; }
+  </style>
+</head>
+<body>
+
+  <nav class="topbar">
+    <a href="/dashboard.html" class="topbar-brand">
+      <div class="brand-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-5 11.6V16h10v-2.4A7 7 0 0 0 12 2z" fill="rgba(255,255,255,0.95)"/><rect x="9" y="17.5" width="6" height="2" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="9.5" y="20.5" width="5" height="1.5" rx=".75" fill="rgba(255,255,255,0.5)"/></svg>
+      </div>
+      Bulbring AI
+    </a>
+    <div class="topbar-right">
+      <a href="/dashboard.html" style="font-size:13px;color:rgba(255,255,255,.65);text-decoration:none;margin-right:12px;">← Dashboard</a>
+      <button class="btn-topbar-logout" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="page-header">
+      <h1>HST / GST Return Summary</h1>
+      <p>Calculate net HST owing or refundable — supports regular method and CRA Quick Method</p>
+    </div>
+
+    <div class="hst-wrap">
+
+      <!-- Live preview -->
+      <div class="preview-card">
+        <div class="preview-header">Live Calculation</div>
+        <div class="preview-body">
+          <div class="preview-row"><span>Taxable Revenue</span><span id="pv-rev">$0.00</span></div>
+          <div class="preview-row"><span>HST Collected</span><span id="pv-collected">$0.00</span></div>
+          <div class="preview-row"><span>Input Tax Credits</span><span id="pv-itc">$0.00</span></div>
+          <div class="preview-row" id="pv-net-row"><span>Net HST Owing</span><span id="pv-net">$0.00</span></div>
+        </div>
+      </div>
+
+      <form id="hst-form">
+
+        <div class="form-section">
+          <h3>Business Info</h3>
+          <div class="field-row">
+            <div class="field">
+              <label>Business Name</label>
+              <input type="text" name="businessName" placeholder="Smith Consulting Inc." />
+            </div>
+            <div class="field">
+              <label>HST Registration #</label>
+              <input type="text" name="hstNumber" placeholder="123456789RT0001" />
+            </div>
+            <div class="field">
+              <label>Period Start</label>
+              <input type="date" name="periodStart" />
+            </div>
+            <div class="field">
+              <label>Period End</label>
+              <input type="date" name="periodEnd" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Revenue</h3>
+          <div class="field-row">
+            <div class="field">
+              <label>Total Business Revenue ($)</label>
+              <input type="number" name="revenue" placeholder="0.00" step="0.01" min="0" oninput="recalc()" />
+            </div>
+            <div class="field">
+              <label>HST Rate</label>
+              <select name="hstRate" onchange="recalc()">
+                <option value="0.13">13% — Ontario HST</option>
+                <option value="0.15">15% — Atlantic HST</option>
+                <option value="0.05">5% — GST only</option>
+                <option value="0.14975">14.975% — Quebec QST+GST</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Zero-Rated Revenue ($) <small style="font-weight:400;color:#A0AEC0">e.g. exports</small></label>
+              <input type="number" name="zeroRatedRev" placeholder="0.00" step="0.01" min="0" oninput="recalc()" />
+            </div>
+            <div class="field">
+              <label>Exempt Revenue ($) <small style="font-weight:400;color:#A0AEC0">e.g. rent</small></label>
+              <input type="number" name="exemptRev" placeholder="0.00" step="0.01" min="0" oninput="recalc()" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Input Tax Credits (Regular Method)</h3>
+          <div class="toggle-row" onclick="document.getElementById('qm-check').click()">
+            <input type="checkbox" id="qm-check" name="useQuickMethod" onchange="toggleQM(); recalc();" />
+            <div>
+              <label for="qm-check">Use CRA Quick Method instead</label>
+              <small>For businesses with revenue under $400K — remit a flat % of gross sales</small>
+            </div>
+          </div>
+
+          <div id="itc-fields">
+            <div class="field-row" style="margin-top:14px;">
+              <div class="field">
+                <label>Total Operating Expenses with HST ($)</label>
+                <input type="number" name="itcExpenses" placeholder="0.00" step="0.01" min="0" oninput="recalc()" />
+              </div>
+              <div class="field">
+                <label>Capital Purchases with HST ($)</label>
+                <input type="number" name="itcCapital" placeholder="0.00" step="0.01" min="0" oninput="recalc()" />
+              </div>
+            </div>
+          </div>
+
+          <div id="quick-fields">
+            <div class="field-row" style="margin-top:14px;">
+              <div class="field">
+                <label>Quick Method Rate (%)</label>
+                <select name="quickMethodRate" onchange="recalc()">
+                  <option value="0.088">8.8% — Services (Ontario)</option>
+                  <option value="0.086">8.6% — Services (Atlantic)</option>
+                  <option value="0.028">2.8% — Goods/retail (Ontario)</option>
+                  <option value="0.026">2.6% — Goods/retail (Atlantic)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="generate-btn" id="gen-btn">Generate HST Return Summary →</button>
+        <div class="alert" id="alert"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('token'); window.location.href = '/';
+    });
+
+    function gv(name) { return parseFloat(document.querySelector(`[name="${name}"]`)?.value) || 0; }
+    function fmt(n)   { return '$' + Math.abs(n).toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+    function toggleQM() {
+      const on = document.getElementById('qm-check').checked;
+      document.getElementById('itc-fields').style.display   = on ? 'none' : 'block';
+      document.getElementById('quick-fields').style.display = on ? 'block' : 'none';
+    }
+
+    function recalc() {
+      const rev    = gv('revenue') - gv('zeroRatedRev') - gv('exemptRev');
+      const rate   = parseFloat(document.querySelector('[name="hstRate"]')?.value) || 0.13;
+      const collected = rev * rate;
+      const useQM  = document.getElementById('qm-check').checked;
+      let itc = 0, net = 0;
+
+      if (useQM) {
+        const qRate = parseFloat(document.querySelector('[name="quickMethodRate"]')?.value) || 0.088;
+        net = (rev + collected) * qRate;
+      } else {
+        itc = (gv('itcExpenses') + gv('itcCapital')) * rate;
+        net = collected - itc;
+      }
+
+      document.getElementById('pv-rev').textContent       = fmt(Math.max(0, rev));
+      document.getElementById('pv-collected').textContent = fmt(collected);
+      document.getElementById('pv-itc').textContent       = useQM ? '(Quick Method)' : fmt(itc);
+      const netEl  = document.getElementById('pv-net');
+      const netRow = document.getElementById('pv-net-row');
+      netEl.textContent = fmt(net);
+      netRow.className  = 'preview-row ' + (net >= 0 ? 'owing' : 'refund');
+      document.querySelector('#pv-net-row span:first-child').textContent = net >= 0 ? 'Net HST Owing' : 'HST Refund';
+    }
+
+    document.getElementById('hst-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = document.getElementById('gen-btn');
+      btn.disabled = true; btn.textContent = 'Generating…';
+      hideAlert();
+
+      const data = {
+        businessName:    e.target.businessName.value,
+        hstNumber:       e.target.hstNumber.value,
+        periodStart:     e.target.periodStart.value,
+        periodEnd:       e.target.periodEnd.value,
+        revenue:         gv('revenue'),
+        hstRate:         parseFloat(e.target.hstRate.value) || 0.13,
+        zeroRatedRev:    gv('zeroRatedRev'),
+        exemptRev:       gv('exemptRev'),
+        itcExpenses:     gv('itcExpenses'),
+        itcCapital:      gv('itcCapital'),
+        useQuickMethod:  document.getElementById('qm-check').checked,
+        quickMethodRate: parseFloat(document.querySelector('[name="quickMethodRate"]')?.value) || 0.088,
+      };
+
+      try {
+        const res = await fetch('/api/hst/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) { const d = await res.json(); showAlert(d.error || 'Failed'); btn.disabled = false; btn.textContent = 'Generate HST Return Summary →'; return; }
+
+        const blob = await res.blob();
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href = url;
+        a.download = `hst-return-${new Date().toISOString().split('T')[0]}.xlsx`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showAlert('HST summary downloaded! Also saved to File History.', 'success');
+      } catch { showAlert('Could not connect to server.'); }
+
+      btn.disabled = false; btn.textContent = 'Generate HST Return Summary →';
+    });
+
+    function showAlert(msg, type = 'error') {
+      const el = document.getElementById('alert');
+      el.textContent = msg; el.className = `alert alert-${type} show`;
+    }
+    function hideAlert() { document.getElementById('alert').className = 'alert'; }
+  </script>
+</body>
+</html>

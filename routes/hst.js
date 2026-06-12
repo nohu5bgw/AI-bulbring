@@ -1,7 +1,7 @@
 const express = require('express');
 const jwt     = require('jsonwebtoken');
-const { buildInvoice } = require('../lib/invoiceBuilder');
-const history = require('../lib/historyManager');
+const { buildHST } = require('../lib/hstBuilder');
+const history     = require('../lib/historyManager');
 
 const router = express.Router();
 
@@ -15,14 +15,12 @@ function requireAuth(req, res, next) {
 router.post('/generate', requireAuth, async (req, res) => {
   try {
     const data = req.body;
-    if (!data.lineItems?.length) return res.status(400).json({ error: 'At least one line item is required' });
+    const buf      = await buildHST(data);
+    const dateStr  = new Date().toISOString().split('T')[0];
+    const filename = `hst-return-${dateStr}.xlsx`;
+    const desc     = `HST Return${data.businessName ? ' — ' + data.businessName : ''}${data.periodStart ? ' (' + data.periodStart + ')' : ''}`;
 
-    const buf = await buildInvoice(data);
-    // Strip everything except alphanumerics and hyphens before embedding in a header
-    const safeNum = (data.invoiceNumber || '').replace(/[^a-zA-Z0-9\-_]/g, '').slice(0, 40);
-    const filename = `invoice${safeNum ? `-${safeNum}` : ''}-${new Date().toISOString().split('T')[0]}.xlsx`;
-
-    history.save('invoice', 'Invoice', filename, `Invoice${safeNum ? ' #' + safeNum : ''}${data.clientName ? ' — ' + data.clientName : ''}`, buf);
+    history.save('hst', 'HST Return', filename, desc, buf);
 
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -31,8 +29,8 @@ router.post('/generate', requireAuth, async (req, res) => {
     });
     res.send(buf);
   } catch (err) {
-    console.error('Invoice error:', err);
-    res.status(500).json({ error: 'Failed to generate invoice. Please try again.' });
+    console.error('HST error:', err);
+    res.status(500).json({ error: 'Failed to generate HST summary. Please try again.' });
   }
 });
 

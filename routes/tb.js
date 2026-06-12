@@ -4,6 +4,7 @@ const multer    = require('multer');
 const ExcelJS   = require('exceljs');
 const Anthropic = require('@anthropic-ai/sdk');
 const { buildTrialBalanceReport } = require('../lib/tbGenerator');
+const history = require('../lib/historyManager');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -19,6 +20,8 @@ router.post('/generate', requireAuth, async (req, res) => {
   try {
     const buf = await buildTrialBalanceReport(req.body);
     const filename = `trial-balance-${new Date().toISOString().split('T')[0]}.xlsx`;
+    const desc = `Trial Balance${req.body.businessName ? ' — ' + req.body.businessName : ''}${req.body.periodEnd ? ' (' + req.body.periodEnd + ')' : ''}`;
+    history.save('tb', 'Trial Balance', filename, desc, buf);
 
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -102,6 +105,9 @@ Return ONLY valid JSON (no markdown fences):
     });
 
     const filename = `trial-balance-${new Date().toISOString().split('T')[0]}.xlsx`;
+    const desc2 = `Trial Balance (imported)${parsed.businessName ? ' — ' + parsed.businessName : ''}${parsed.periodEnd ? ' (' + parsed.periodEnd + ')' : ''}`;
+    history.save('tb', 'Trial Balance', filename, desc2, buf);
+
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'Content-Disposition': `attachment; filename="${filename}"`,

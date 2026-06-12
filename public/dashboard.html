@@ -5,6 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard — Bulbring AI</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .history-strip {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #EBF2FB; border: 1px solid #BEE3F8;
+      border-radius: 10px; padding: 12px 18px; margin-bottom: 32px;
+      flex-wrap: wrap; gap: 10px;
+    }
+    .history-strip-left { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #2B6CB0; }
+    .history-strip-left strong { color: #1B3A6B; }
+    .history-count {
+      background: #1B3A6B; color: #fff;
+      font-size: 11px; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px;
+    }
+    .history-link {
+      font-size: 13px; font-weight: 600; color: #1B3A6B;
+      text-decoration: none; padding: 7px 14px;
+      border: 1px solid #BEE3F8; border-radius: 8px;
+      transition: background .15s;
+    }
+    .history-link:hover { background: #fff; }
+    .section-divider {
+      display: flex; align-items: center; gap: 14px; margin: 40px 0 24px;
+    }
+    .section-divider h2 { font-size: 18px; font-weight: 700; color: var(--text); white-space: nowrap; }
+    .section-divider-line { flex: 1; height: 1px; background: #E2E8F0; }
+    .section-sub { font-size: 13px; color: var(--muted); margin-top: -18px; margin-bottom: 20px; }
+  </style>
 </head>
 <body>
 
@@ -23,17 +51,54 @@
 
   <div class="main">
     <div class="page-header">
-      <h1>Your Tools</h1>
-      <p>Select a tool to get started</p>
+      <h1>Dashboard</h1>
+      <p>All your accounting tools in one place</p>
     </div>
+
+    <!-- History strip -->
+    <div class="history-strip">
+      <div class="history-strip-left">
+        📂 <strong>File History</strong> — re-download any file you've generated this session
+        <span class="history-count" id="hist-count">0</span>
+      </div>
+      <a href="/history.html" class="history-link">View All Files →</a>
+    </div>
+
+    <!-- CRA Tools -->
+    <div class="section-divider">
+      <h2>CRA Accounting Tools</h2>
+      <div class="section-divider-line"></div>
+    </div>
+    <p class="section-sub">AI-powered tools for Canadian tax and bookkeeping</p>
 
     <div class="tools-grid">
 
       <div class="tool-card">
         <div class="tool-icon">🏦</div>
-        <h3>Bank Statement Transaction Tool</h3>
-        <p>Upload a PDF bank statement. AI categorizes every transaction into CRA T2125 expense columns and exports to Excel or a trial balance import.</p>
+        <h3>Bank Statement Analyzer</h3>
+        <p>Upload a PDF bank statement. AI categorizes every transaction into CRA T2125 columns and exports to Excel or a trial balance import.</p>
         <a href="/bst.html" class="btn btn-primary" style="margin-top: auto;">Open Tool</a>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-icon">📷</div>
+        <h3>Receipt Scanner</h3>
+        <p>Photo of a receipt — AI reads every line item, assigns the correct CRA category, and exports a formatted Excel row. Works on any receipt.</p>
+        <a href="/receipt.html" class="btn btn-primary" style="margin-top: auto;">Scan Receipt</a>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-icon">📊</div>
+        <h3>Profit &amp; Loss Statement</h3>
+        <p>Enter revenue and expenses across all CRA T2125 categories. Get a clean, formatted P&amp;L with net income, margin, and expense breakdowns.</p>
+        <a href="/pl.html" class="btn btn-primary" style="margin-top: auto;">Build P&amp;L</a>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-icon">🏛️</div>
+        <h3>HST / GST Return Summary</h3>
+        <p>Calculate HST collected vs. input tax credits. Supports Ontario 13%, Atlantic 15%, GST-only, and CRA Quick Method. Filing-ready Excel summary.</p>
+        <a href="/hst.html" class="btn btn-primary" style="margin-top: auto;">Calculate HST</a>
       </div>
 
       <div class="tool-card">
@@ -46,16 +111,18 @@
       <div class="tool-card">
         <div class="tool-icon">📋</div>
         <h3>Trial Balance Generator</h3>
-        <p>Enter account balances across all CRA categories and generate a formatted, balanced trial balance report.</p>
+        <p>Enter account balances across all CRA categories and generate a formatted, balanced trial balance report in seconds.</p>
         <a href="/tb.html" class="btn btn-primary" style="margin-top: auto;">Open Tool</a>
       </div>
 
     </div>
 
-    <div class="page-header" style="margin-top: 48px;">
-      <h1>QuitSlip</h1>
-      <p>Digital receipts — tap, done, no app needed</p>
+    <!-- QuitSlip -->
+    <div class="section-divider" style="margin-top: 48px;">
+      <h2>QuitSlip</h2>
+      <div class="section-divider-line"></div>
     </div>
+    <p class="section-sub">Digital receipts via NFC — tap, done, no app needed</p>
 
     <div class="tools-grid">
 
@@ -69,7 +136,7 @@
       <div class="tool-card" style="border-top: 3px solid #2563EB;">
         <div class="tool-icon">📑</div>
         <h3>QuitSlip Summary</h3>
-        <p>Overview, pitch deck, and business summary for QuitSlip — the NFC digital receipt platform replacing paper receipts at point of sale.</p>
+        <p>Pitch deck and business summary for QuitSlip — the NFC digital receipt platform replacing paper receipts at point of sale.</p>
         <a href="/quitslip-summary.html" class="btn btn-primary" style="margin-top: auto; background:#2563EB;">View Summary</a>
       </div>
 
@@ -85,6 +152,16 @@
       localStorage.removeItem('token');
       window.location.href = '/';
     });
+
+    // Load history count for the strip
+    fetch('/api/history', { headers: { Authorization: 'Bearer ' + token } })
+      .then(r => r.ok ? r.json() : [])
+      .then(items => {
+        if (items.length > 0) {
+          document.getElementById('hist-count').textContent = items.length;
+        }
+      })
+      .catch(() => {});
   </script>
 </body>
 </html>
