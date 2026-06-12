@@ -37,6 +37,10 @@ router.post('/generate-from-file', requireAuth, upload.single('tbFile'), async (
   if (!req.file.originalname.toLowerCase().endsWith('.xlsx')) {
     return res.status(400).json({ error: 'Only .xlsx files are accepted' });
   }
+  // XLSX files are ZIP archives — verify PK magic bytes before parsing
+  if (req.file.buffer[0] !== 0x50 || req.file.buffer[1] !== 0x4B) {
+    return res.status(400).json({ error: 'Invalid file format — please upload an .xlsx file' });
+  }
 
   try {
     // Extract spreadsheet content as text for Claude

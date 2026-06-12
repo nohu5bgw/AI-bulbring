@@ -17,8 +17,9 @@ router.post('/generate', requireAuth, async (req, res) => {
     if (!data.lineItems?.length) return res.status(400).json({ error: 'At least one line item is required' });
 
     const buf = await buildInvoice(data);
-    const num = data.invoiceNumber ? `-${data.invoiceNumber}` : '';
-    const filename = `invoice${num}-${new Date().toISOString().split('T')[0]}.xlsx`;
+    // Strip everything except alphanumerics and hyphens before embedding in a header
+    const safeNum = (data.invoiceNumber || '').replace(/[^a-zA-Z0-9\-_]/g, '').slice(0, 40);
+    const filename = `invoice${safeNum ? `-${safeNum}` : ''}-${new Date().toISOString().split('T')[0]}.xlsx`;
 
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
