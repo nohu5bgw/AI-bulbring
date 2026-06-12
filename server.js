@@ -14,6 +14,7 @@ const plRouter      = require('./routes/pl');
 const hstRouter     = require('./routes/hst');
 const receiptRouter = require('./routes/receipt');
 const aiRouter      = require('./routes/ai');
+const auditRouter   = require('./routes/audit');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -71,6 +72,7 @@ app.use('/api/receipt/scan',           expensiveLimiter);
 app.use('/api/pl/generate',            expensiveLimiter);
 app.use('/api/hst/generate',           expensiveLimiter);
 app.use('/api/ai/chat',                expensiveLimiter);
+app.use('/api/audit/analyze',         expensiveLimiter);
 
 // API routes
 app.use('/api/auth',    authRouter);
@@ -82,6 +84,7 @@ app.use('/api/pl',      plRouter);
 app.use('/api/hst',     hstRouter);
 app.use('/api/receipt', receiptRouter);
 app.use('/api/ai',      aiRouter);
+app.use('/api/audit',  auditRouter);
 
 // Serve frontend
 app.use(express.static(path.join(__dirname, 'public')));

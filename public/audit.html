@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Audit Risk Scorer — Bulbring AI</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .audit-wrap { max-width: 760px; margin: 0 auto; }
+
+    /* Upload card */
+    .drop-zone {
+      border: 2px dashed #CBD5E0; border-radius: 14px;
+      padding: 44px 32px; text-align: center; cursor: pointer;
+      background: #FAFBFC; transition: border-color .2s, background .2s;
+      position: relative;
+    }
+    .drop-zone.dragover { border-color: #4299E1; background: #EBF8FF; }
+    .drop-zone input[type=file] { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
+    .drop-icon { font-size: 40px; margin-bottom: 12px; }
+    .drop-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .drop-sub   { font-size: 13px; color: var(--muted); }
+
+    .file-list-wrap {
+      display: none; margin-top: 14px;
+      background: #F7FAFC; border: 1px solid #E2E8F0;
+      border-radius: 9px; padding: 10px 14px;
+      font-size: 13px; color: #4A5568; line-height: 1.8;
+    }
+    .file-list-clear {
+      font-size: 12px; color: #A0AEC0; cursor: pointer; float: right;
+      padding: 2px 6px; border-radius: 4px;
+    }
+    .file-list-clear:hover { color: #C53030; }
+
+    .analyze-btn {
+      display: none; width: 100%; margin-top: 16px;
+      background: #1B3A6B; color: #fff; border: none;
+      border-radius: 10px; padding: 14px;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: background .15s;
+    }
+    .analyze-btn:hover:not(:disabled) { background: #2a549a; }
+    .analyze-btn:disabled { opacity: .55; cursor: not-allowed; }
+
+    /* Progress */
+    #progress { display: none; text-align: center; padding: 32px 0; }
+    .spinner {
+      width: 38px; height: 38px; border: 3px solid #E2E8F0;
+      border-top-color: #1B3A6B; border-radius: 50%;
+      animation: spin .7s linear infinite; margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .progress-steps { display: flex; flex-direction: column; gap: 8px; align-items: center; margin-top: 12px; }
+    .p-step { font-size: 13px; color: #A0AEC0; display: flex; align-items: center; gap: 8px; }
+    .p-step.active { color: #1B3A6B; font-weight: 600; }
+    .p-step.done   { color: #047857; }
+    .p-step-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    .alert { display:none; margin-top:16px; padding:12px 16px; border-radius:9px; font-size:13px; }
+    .alert.show { display:block; }
+    .alert-error { background:#FFF5F5; border:1px solid #FEB2B2; color:#C53030; }
+
+    /* ── Report ── */
+    #report { display: none; margin-top: 28px; }
+
+    /* Score header */
+    .score-header {
+      border-radius: 16px; padding: 28px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 20px; margin-bottom: 24px;
+      color: #fff;
+    }
+    .score-header.low    { background: linear-gradient(135deg, #047857, #059669); }
+    .score-header.medium { background: linear-gradient(135deg, #B45309, #D97706); }
+    .score-header.high   { background: linear-gradient(135deg, #991B1B, #DC2626); }
+
+    .score-left h2  { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+    .score-left p   { font-size: 14px; color: rgba(255,255,255,.8); max-width: 420px; line-height: 1.5; }
+    .score-meta     { font-size: 12px; color: rgba(255,255,255,.65); margin-top: 10px; }
+
+    .score-dial {
+      text-align: center; flex-shrink: 0;
+    }
+    .score-num {
+      font-size: 52px; font-weight: 800; letter-spacing: -2px; line-height: 1;
+    }
+    .score-label { font-size: 12px; color: rgba(255,255,255,.7); margin-top: 4px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+
+    /* Stats row */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 560px) { .stats-row { grid-template-columns: 1fr 1fr; } }
+    .stat-card {
+      background: #fff; border: 1px solid #E2E8F0; border-radius: 12px;
+      padding: 16px 18px;
+    }
+    .stat-card-n { font-size: 22px; font-weight: 700; color: #1A202C; letter-spacing: -0.5px; }
+    .stat-card-l { font-size: 12px; color: #718096; margin-top: 3px; font-weight: 500; }
+
+    /* Flags */
+    .section-title {
+      font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .8px; color: #1B3A6B; margin-bottom: 12px;
+    }
+    .flag-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .flag-card {
+      background: #fff; border: 1px solid #E2E8F0; border-radius: 12px;
+      overflow: hidden; cursor: pointer;
+    }
+    .flag-card:hover .flag-header { background: #F7FAFC; }
+    .flag-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; transition: background .15s;
+    }
+    .flag-sev {
+      width: 28px; height: 28px; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; flex-shrink: 0; font-weight: 700;
+    }
+    .sev-high   { background: #FFF5F5; color: #C53030; }
+    .sev-medium { background: #FFFBEB; color: #B45309; }
+    .sev-low    { background: #EBF8FF; color: #2B6CB0; }
+    .flag-title-wrap { flex: 1; }
+    .flag-title    { font-size: 14px; font-weight: 600; color: #1A202C; }
+    .flag-category { font-size: 12px; color: #718096; margin-top: 2px; }
+    .flag-amount   { font-size: 14px; font-weight: 600; color: #4A5568; white-space: nowrap; }
+    .flag-chevron  { font-size: 12px; color: #A0AEC0; transition: transform .2s; flex-shrink: 0; }
+    .flag-card.open .flag-chevron { transform: rotate(180deg); }
+    .flag-body {
+      display: none; padding: 0 16px 16px 56px;
+      border-top: 1px solid #F7FAFC;
+    }
+    .flag-card.open .flag-body { display: block; }
+    .flag-desc { font-size: 13px; color: #4A5568; line-height: 1.65; margin-bottom: 10px; }
+    .flag-rec  {
+      background: #F0FFF4; border: 1px solid #9AE6B4;
+      border-radius: 8px; padding: 10px 12px;
+      font-size: 12px; color: #276749; line-height: 1.55;
+    }
+    .flag-rec::before { content: '✓ Action: '; font-weight: 700; }
+
+    /* Positives */
+    .positives-list {
+      display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px;
+    }
+    .positive-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 13px; color: #2D3748; line-height: 1.55;
+    }
+    .positive-icon { color: #047857; font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+    /* Recommendations */
+    .rec-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .rec-item {
+      background: #EBF2FB; border: 1px solid #BEE3F8;
+      border-radius: 10px; padding: 12px 16px;
+      font-size: 13px; color: #1B3A6B; line-height: 1.55;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .rec-num {
+      width: 22px; height: 22px; background: #1B3A6B; color: #fff;
+      border-radius: 50%; font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+
+    .scan-again-btn {
+      width: 100%; background: #F7FAFC; color: #2D3748;
+      border: 1px solid #E2E8F0; border-radius: 10px;
+      padding: 12px; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: background .15s; margin-top: 8px;
+    }
+    .scan-again-btn:hover { background: #EDF2F7; }
+
+    .sev-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 5px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+    }
+    .sev-badge.high   { background: #FFF5F5; color: #C53030; }
+    .sev-badge.medium { background: #FFFBEB; color: #B45309; }
+    .sev-badge.low    { background: #EBF8FF; color: #2B6CB0; }
+  </style>
+</head>
+<body>
+
+  <nav class="topbar">
+    <a href="/dashboard.html" class="topbar-brand">
+      <div class="brand-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-5 11.6V16h10v-2.4A7 7 0 0 0 12 2z" fill="rgba(255,255,255,0.95)"/><rect x="9" y="17.5" width="6" height="2" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="9.5" y="20.5" width="5" height="1.5" rx=".75" fill="rgba(255,255,255,0.5)"/></svg>
+      </div>
+      Bulbring AI
+    </a>
+    <div class="topbar-right">
+      <a href="/dashboard.html" style="font-size:13px;color:rgba(255,255,255,.65);text-decoration:none;margin-right:12px;">← Dashboard</a>
+      <button class="btn-topbar-logout" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="page-header">
+      <h1>Audit Risk Scorer</h1>
+      <p>Upload your bank statement — AI flags every item a CRA auditor would question and tells you exactly what to fix</p>
+    </div>
+
+    <div class="audit-wrap">
+
+      <!-- Upload -->
+      <div class="card" id="upload-card">
+        <div class="card-title">Upload Bank Statement PDF</div>
+
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="file-input" accept="application/pdf" multiple />
+          <div class="drop-icon">🔍</div>
+          <div class="drop-title">Drop your PDF bank statements here</div>
+          <div class="drop-sub">or click to browse &nbsp;·&nbsp; multiple files supported</div>
+        </div>
+
+        <div class="file-list-wrap" id="file-list-wrap">
+          <span class="file-list-clear" onclick="clearFiles()">✕ Clear</span>
+          <div id="file-list"></div>
+        </div>
+
+        <button class="analyze-btn" id="analyze-btn" onclick="analyze()">Analyze Audit Risk →</button>
+        <div class="alert alert-error" id="alert"></div>
+      </div>
+
+      <!-- Progress -->
+      <div id="progress">
+        <div class="spinner"></div>
+        <div style="font-size:14px;font-weight:600;color:#1B3A6B;">Scanning for CRA audit risks…</div>
+        <div class="progress-steps">
+          <div class="p-step" id="ps-1"><div class="p-step-dot"></div> Extracting transactions</div>
+          <div class="p-step" id="ps-2"><div class="p-step-dot"></div> Checking CRA risk factors</div>
+          <div class="p-step" id="ps-3"><div class="p-step-dot"></div> Building risk report</div>
+        </div>
+      </div>
+
+      <!-- Report -->
+      <div id="report"></div>
+
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('token'); window.location.href = '/';
+    });
+
+    let selectedFiles = [];
+
+    const dropZone  = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+
+    fileInput.addEventListener('change', () => handleFiles(Array.from(fileInput.files)));
+    dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault(); dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) handleFiles(Array.from(e.dataTransfer.files));
+    });
+
+    function handleFiles(files) {
+      const nonPdf = files.find(f => f.type !== 'application/pdf');
+      if (nonPdf) { showAlert(`"${nonPdf.name}" is not a PDF.`); return; }
+      hideAlert();
+      selectedFiles = files;
+      document.getElementById('file-list').innerHTML = files.map(f => `📄 ${f.name}`).join('<br>');
+      document.getElementById('file-list-wrap').style.display = 'block';
+      document.getElementById('analyze-btn').style.display = 'block';
+    }
+
+    function clearFiles() {
+      selectedFiles = [];
+      fileInput.value = '';
+      document.getElementById('file-list-wrap').style.display = 'none';
+      document.getElementById('analyze-btn').style.display = 'none';
+      hideAlert();
+    }
+
+    function showAlert(msg) {
+      const el = document.getElementById('alert');
+      el.textContent = msg; el.className = 'alert alert-error show';
+    }
+    function hideAlert() { document.getElementById('alert').className = 'alert alert-error'; }
+
+    function setStep(n) {
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById(`ps-${i}`).className =
+          'p-step' + (i < n ? ' done' : i === n ? ' active' : '');
+      }
+    }
+
+    async function analyze() {
+      if (!selectedFiles.length) return;
+      const btn = document.getElementById('analyze-btn');
+      btn.disabled = true; btn.textContent = 'Analyzing…';
+      hideAlert();
+
+      document.getElementById('upload-card').style.display = 'none';
+      document.getElementById('progress').style.display    = 'block';
+      document.getElementById('report').style.display      = 'none';
+
+      setStep(1);
+      const fd = new FormData();
+      selectedFiles.forEach(f => fd.append('statements', f));
+
+      setTimeout(() => setStep(2), 1800);
+      setTimeout(() => setStep(3), 3600);
+
+      try {
+        const res  = await fetch('/api/audit/analyze', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + token },
+          body: fd,
+        });
+        const data = await res.json();
+
+        document.getElementById('progress').style.display = 'none';
+        btn.disabled = false; btn.textContent = 'Analyze Audit Risk →';
+
+        if (!res.ok) {
+          document.getElementById('upload-card').style.display = 'block';
+          showAlert(data.error || 'Analysis failed. Please try again.');
+          return;
+        }
+
+        renderReport(data);
+
+      } catch {
+        document.getElementById('progress').style.display    = 'none';
+        document.getElementById('upload-card').style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Analyze Audit Risk →';
+        showAlert('Could not connect to server.');
+      }
+    }
+
+    function fmt(n) {
+      if (n == null || n === 0) return null;
+      return '$' + Number(n).toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    const SEV_ICON  = { high: '🔴', medium: '🟡', low: '🔵' };
+    const SEV_LABEL = { high: 'High', medium: 'Medium', low: 'Low' };
+
+    function renderReport(d) {
+      const riskClass = (d.overall_risk || 'low').toLowerCase();
+      const score     = Math.min(100, Math.max(0, d.risk_score || 0));
+      const flags     = d.flags || [];
+      const positives = d.positives || [];
+      const recs      = d.top_recommendations || [];
+
+      const highCount   = flags.filter(f => f.severity === 'high').length;
+      const medCount    = flags.filter(f => f.severity === 'medium').length;
+      const totalExpFmt = fmt(d.total_expenses) || '—';
+
+      // Header
+      let html = `
+        <div class="score-header ${riskClass}">
+          <div class="score-left">
+            <h2>Overall Risk: ${d.overall_risk || '—'}</h2>
+            <p>${d.summary || ''}</p>
+            <div class="score-meta">
+              ${d.period ? `Period: ${d.period}  ·  ` : ''}
+              ${d.total_transactions ? `${d.total_transactions} transactions  ·  ` : ''}
+              ${d.total_expenses ? `${totalExpFmt} total expenses` : ''}
+            </div>
+          </div>
+          <div class="score-dial">
+            <div class="score-num">${score}</div>
+            <div class="score-label">Risk Score / 100</div>
+          </div>
+        </div>`;
+
+      // Stats row
+      html += `
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-card-n" style="color:#C53030;">${highCount}</div>
+            <div class="stat-card-l">High-risk flags</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-n" style="color:#B45309;">${medCount}</div>
+            <div class="stat-card-l">Medium-risk flags</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-n">${flags.length}</div>
+            <div class="stat-card-l">Total flags</div>
+          </div>
+        </div>`;
+
+      // Flags
+      if (flags.length > 0) {
+        // Sort: high first, then medium, then low
+        const sorted = [...flags].sort((a,b) => {
+          const ord = { high: 0, medium: 1, low: 2 };
+          return (ord[a.severity] ?? 3) - (ord[b.severity] ?? 3);
+        });
+
+        html += `<div class="section-title">⚠ Audit Flags</div><div class="flag-list">`;
+        sorted.forEach((flag, i) => {
+          const sev   = flag.severity || 'low';
+          const amtFmt = fmt(flag.amount);
+          html += `
+            <div class="flag-card" id="flag-${i}" onclick="toggleFlag(${i})">
+              <div class="flag-header">
+                <div class="flag-sev sev-${sev}">${SEV_ICON[sev]}</div>
+                <div class="flag-title-wrap">
+                  <div class="flag-title">${flag.title || flag.category || 'Flag'}</div>
+                  <div class="flag-category">
+                    <span class="sev-badge ${sev}">${SEV_LABEL[sev]}</span>
+                    &nbsp;${flag.category || ''}
+                    ${flag.count ? `&nbsp;·&nbsp; ${flag.count} transactions` : ''}
+                  </div>
+                </div>
+                ${amtFmt ? `<div class="flag-amount">${amtFmt}</div>` : ''}
+                <div class="flag-chevron">▼</div>
+              </div>
+              <div class="flag-body">
+                <p class="flag-desc">${flag.description || ''}</p>
+                ${flag.recommendation ? `<div class="flag-rec">${flag.recommendation}</div>` : ''}
+              </div>
+            </div>`;
+        });
+        html += `</div>`;
+      }
+
+      // Positives
+      if (positives.length > 0) {
+        html += `<div class="section-title">✓ What Looks Clean</div><div class="positives-list">`;
+        positives.forEach(p => {
+          html += `<div class="positive-item"><span class="positive-icon">✓</span><span>${p}</span></div>`;
+        });
+        html += `</div>`;
+      }
+
+      // Recommendations
+      if (recs.length > 0) {
+        html += `<div class="section-title">Top Actions Before Filing</div><div class="rec-list">`;
+        recs.forEach((r, i) => {
+          html += `<div class="rec-item"><div class="rec-num">${i + 1}</div><span>${r}</span></div>`;
+        });
+        html += `</div>`;
+      }
+
+      // Scan again
+      html += `<button class="scan-again-btn" onclick="resetToUpload()">← Analyze Another Statement</button>`;
+
+      const reportEl = document.getElementById('report');
+      reportEl.innerHTML = html;
+      reportEl.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleFlag(i) {
+      document.getElementById(`flag-${i}`)?.classList.toggle('open');
+    }
+
+    function resetToUpload() {
+      selectedFiles = [];
+      fileInput.value = '';
+      document.getElementById('file-list-wrap').style.display = 'none';
+      document.getElementById('analyze-btn').style.display    = 'none';
+      document.getElementById('analyze-btn').disabled         = false;
+      document.getElementById('analyze-btn').textContent      = 'Analyze Audit Risk →';
+      document.getElementById('report').style.display         = 'none';
+      document.getElementById('upload-card').style.display    = 'block';
+      hideAlert();
+    }
+  </script>
+</body>
+</html>
