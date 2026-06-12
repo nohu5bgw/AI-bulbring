@@ -20,14 +20,14 @@
       <div id="alert" class="alert"></div>
 
       <!-- Step 1: username + password -->
-      <form id="login-form">
+      <form id="login-form" autocomplete="off">
         <div class="field">
           <label for="username">Username</label>
-          <input id="username" type="text" placeholder="Username" required autocomplete="username" />
+          <input id="username" type="text" placeholder="Username" required autocomplete="off" />
         </div>
         <div class="field">
           <label for="password">Password</label>
-          <input id="password" type="password" placeholder="Password" required autocomplete="current-password" />
+          <input id="password" type="password" placeholder="Password" required autocomplete="new-password" />
         </div>
         <button type="submit" class="btn btn-primary btn-full" id="login-btn">Sign In</button>
       </form>
