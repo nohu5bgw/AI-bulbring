@@ -31,7 +31,53 @@
 
     <div class="page-header">
       <h1>Trial Balance Generator</h1>
-      <p>Enter account balances to generate a formatted trial balance Excel file.</p>
+      <p>Upload a Bank Statement Tool export to auto-import, or enter balances manually.</p>
+    </div>
+
+    <!-- Auto-import from BST -->
+    <div class="card" id="import-card">
+      <div class="card-title">Auto Import from Bank Statement Tool</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Download a <strong>Trial Balance Import (.xlsx)</strong> from the Bank Statement Tool, then upload it here. AI maps all accounts automatically — no manual entry needed.</p>
+
+      <div class="drop-zone" id="import-drop-zone">
+        <input type="file" id="import-file-input" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+        <span class="drop-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </span>
+        <h3>Drop your Trial Balance Import here</h3>
+        <p>or click to browse &nbsp;·&nbsp; .xlsx files only</p>
+      </div>
+
+      <div class="file-selected" id="import-file-selected" style="display:none;">
+        <span>📊</span>
+        <span class="file-selected-name" id="import-file-name"></span>
+        <span class="file-clear" id="import-file-clear" title="Remove">✕</span>
+      </div>
+
+      <div class="progress-steps" id="import-progress" style="display:none;">
+        <div class="step" id="import-step-1"><div class="step-dot">1</div> Reading Excel file</div>
+        <div class="step" id="import-step-2"><div class="step-dot">2</div> AI mapping accounts</div>
+        <div class="step" id="import-step-3"><div class="step-dot">3</div> Building trial balance</div>
+      </div>
+
+      <div class="result-banner" id="import-result-banner" style="display:none;">
+        <div>
+          <h3>Trial balance ready</h3>
+          <p>All accounts mapped and balanced</p>
+        </div>
+        <button class="btn btn-green" id="import-download-btn">Download</button>
+      </div>
+
+      <div id="import-alert" class="alert alert-error" style="margin-top:16px;"></div>
+
+      <div class="action-row">
+        <button type="button" class="btn btn-primary" id="import-btn" disabled>Generate from File</button>
+        <button type="button" class="btn btn-ghost" id="import-reset-btn" style="display:none;">Upload Another</button>
+      </div>
+    </div>
+
+    <div class="section-divider">
+      <span>— or enter balances manually —</span>
     </div>
 
     <form id="tb-form">
@@ -127,10 +173,160 @@
     }
     .balanced   { color: var(--green); font-weight: 600; }
     .unbalanced { color: var(--red);   font-weight: 600; }
+
+    .section-divider {
+      text-align: center;
+      margin: 32px 0 24px;
+      position: relative;
+    }
+    .section-divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border);
+    }
+    .section-divider span {
+      position: relative;
+      background: var(--bg);
+      padding: 0 16px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
   </style>
 
   <script>
     if (!localStorage.getItem('token')) window.location.href = '/';
+
+    // ── Auto-import from BST ─────────────────────────────────────────────────
+    let importFile = null;
+    let importBlob = null;
+
+    const importDropZone  = document.getElementById('import-drop-zone');
+    const importFileInput = document.getElementById('import-file-input');
+    const importSelected  = document.getElementById('import-file-selected');
+    const importFileName  = document.getElementById('import-file-name');
+    const importClear     = document.getElementById('import-file-clear');
+    const importBtn       = document.getElementById('import-btn');
+    const importProgress  = document.getElementById('import-progress');
+    const importResult    = document.getElementById('import-result-banner');
+    const importDlBtn     = document.getElementById('import-download-btn');
+    const importResetBtn  = document.getElementById('import-reset-btn');
+    const importAlert     = document.getElementById('import-alert');
+
+    function setImportStep(n) {
+      importProgress.style.display = 'flex';
+      ['import-step-1','import-step-2','import-step-3'].forEach((id, i) => {
+        const el = document.getElementById(id);
+        el.classList.toggle('active',  i + 1 === n);
+        el.classList.toggle('done',    i + 1 < n);
+      });
+    }
+
+    function selectImportFile(file) {
+      if (!file || !file.name.toLowerCase().endsWith('.xlsx')) {
+        importAlert.textContent = 'Please select a .xlsx file from the Bank Statement Tool.';
+        importAlert.classList.add('show');
+        return;
+      }
+      importFile = file;
+      importAlert.classList.remove('show');
+      importSelected.style.display = 'flex';
+      importFileName.textContent = file.name;
+      importDropZone.classList.add('has-file');
+      importBtn.disabled = false;
+    }
+
+    importDropZone.addEventListener('click', () => importFileInput.click());
+    importFileInput.addEventListener('change', e => selectImportFile(e.target.files[0]));
+    importDropZone.addEventListener('dragover', e => { e.preventDefault(); importDropZone.classList.add('drag-over'); });
+    importDropZone.addEventListener('dragleave', () => importDropZone.classList.remove('drag-over'));
+    importDropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      importDropZone.classList.remove('drag-over');
+      selectImportFile(e.dataTransfer.files[0]);
+    });
+
+    importClear.addEventListener('click', () => {
+      importFile = null;
+      importBlob = null;
+      importFileInput.value = '';
+      importSelected.style.display = 'none';
+      importDropZone.classList.remove('has-file');
+      importBtn.disabled = true;
+      importProgress.style.display = 'none';
+      importResult.style.display = 'none';
+      importAlert.classList.remove('show');
+    });
+
+    importBtn.addEventListener('click', async () => {
+      if (!importFile) return;
+      importAlert.classList.remove('show');
+      importResult.style.display = 'none';
+      importBtn.disabled = true;
+      importResetBtn.style.display = 'none';
+
+      setImportStep(1);
+      await new Promise(r => setTimeout(r, 400));
+      setImportStep(2);
+
+      const fd = new FormData();
+      fd.append('tbFile', importFile);
+
+      try {
+        const res = await fetch('/api/tb/generate-from-file', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          body: fd,
+        });
+
+        if (res.status === 401) { localStorage.removeItem('token'); window.location.href = '/'; return; }
+        if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || 'Processing failed'); }
+
+        setImportStep(3);
+        await new Promise(r => setTimeout(r, 300));
+
+        importBlob = await res.blob();
+        importProgress.style.display = 'none';
+        importResult.style.display = 'flex';
+        importResetBtn.style.display = 'inline-flex';
+
+      } catch (err) {
+        importProgress.style.display = 'none';
+        importAlert.textContent = err.message;
+        importAlert.classList.add('show');
+        importBtn.disabled = false;
+      }
+    });
+
+    importDlBtn.addEventListener('click', () => {
+      if (!importBlob) return;
+      const url = URL.createObjectURL(importBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `trial-balance-${new Date().toISOString().split('T')[0]}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    importResetBtn.addEventListener('click', () => {
+      importFile = null;
+      importBlob = null;
+      importFileInput.value = '';
+      importSelected.style.display = 'none';
+      importDropZone.classList.remove('has-file');
+      importBtn.disabled = true;
+      importProgress.style.display = 'none';
+      importResult.style.display = 'none';
+      importAlert.classList.remove('show');
+      importResetBtn.style.display = 'none';
+    });
+    // ── end auto-import ──────────────────────────────────────────────────────
+
 
     document.getElementById('logout-btn').addEventListener('click', () => {
       localStorage.removeItem('token');
