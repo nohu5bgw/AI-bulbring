@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy &amp; Data Security — Bulbring AI</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .privacy-wrap { max-width: 720px; margin: 0 auto; }
+
+    .privacy-hero {
+      background: linear-gradient(135deg, #1B3A6B, #2a549a);
+      border-radius: 16px; padding: 36px 40px; color: #fff;
+      margin-bottom: 32px; display: flex; align-items: center; gap: 24px;
+    }
+    .privacy-hero-icon { font-size: 48px; flex-shrink: 0; }
+    .privacy-hero h2  { font-size: 22px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+    .privacy-hero p   { font-size: 14px; color: rgba(255,255,255,.8); line-height: 1.6; margin: 0; }
+
+    .privacy-section  { margin-bottom: 28px; }
+    .privacy-section h3 {
+      font-size: 15px; font-weight: 700; color: #1B3A6B;
+      margin-bottom: 12px; padding-bottom: 8px;
+      border-bottom: 2px solid #EBF2FB;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .privacy-section p,
+    .privacy-section li {
+      font-size: 14px; color: #4A5568; line-height: 1.75;
+    }
+    .privacy-section ul { padding-left: 18px; margin: 8px 0; }
+    .privacy-section li { margin-bottom: 4px; }
+
+    .shield-row {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+      margin-bottom: 32px;
+    }
+    @media (max-width: 560px) { .shield-row { grid-template-columns: 1fr 1fr; } }
+    .shield-card {
+      background: #F0FFF4; border: 1px solid #9AE6B4;
+      border-radius: 12px; padding: 16px;
+      text-align: center;
+    }
+    .shield-card-icon { font-size: 24px; margin-bottom: 8px; }
+    .shield-card-title { font-size: 13px; font-weight: 700; color: #276749; }
+    .shield-card-desc  { font-size: 12px; color: #4A5568; margin-top: 4px; line-height: 1.4; }
+
+    .highlight-box {
+      background: #EBF2FB; border: 1px solid #BEE3F8;
+      border-radius: 10px; padding: 16px 20px; margin: 12px 0;
+      font-size: 13px; color: #2B6CB0; line-height: 1.65;
+    }
+    .highlight-box strong { color: #1B3A6B; }
+
+    .warning-box {
+      background: #FFFBEB; border: 1px solid #F6E05E;
+      border-radius: 10px; padding: 16px 20px; margin: 12px 0;
+      font-size: 13px; color: #744210; line-height: 1.65;
+    }
+
+    .updated-line {
+      font-size: 12px; color: #A0AEC0; margin-bottom: 28px; text-align: center;
+    }
+
+    .print-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #F7FAFC; border: 1px solid #E2E8F0;
+      border-radius: 8px; padding: 8px 16px;
+      font-size: 13px; font-weight: 600; color: #4A5568;
+      cursor: pointer; text-decoration: none;
+      transition: background .15s; margin-bottom: 28px;
+    }
+    .print-btn:hover { background: #EDF2F7; }
+
+    @media print {
+      .topbar, .print-btn { display: none !important; }
+      body { background: #fff; }
+      .privacy-hero { background: #1B3A6B !important; -webkit-print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="topbar">
+    <a href="/dashboard.html" class="topbar-brand">
+      <div class="brand-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-5 11.6V16h10v-2.4A7 7 0 0 0 12 2z" fill="rgba(255,255,255,0.95)"/><rect x="9" y="17.5" width="6" height="2" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="9.5" y="20.5" width="5" height="1.5" rx=".75" fill="rgba(255,255,255,0.5)"/></svg>
+      </div>
+      Bulbring AI
+    </a>
+    <div class="topbar-right">
+      <a href="/dashboard.html" style="font-size:13px;color:rgba(255,255,255,.65);text-decoration:none;margin-right:12px;">← Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="privacy-wrap">
+
+      <div class="privacy-hero">
+        <div class="privacy-hero-icon">🔒</div>
+        <div>
+          <h2>Your Privacy &amp; Data Security</h2>
+          <p>Bulbring AI is a private, single-user accounting tool. Your financial documents are processed securely, never sold, and never stored beyond your session.</p>
+        </div>
+      </div>
+
+      <div class="updated-line">Last updated: June 2025 &nbsp;·&nbsp; Bulbring AI by QuitSlip Technologies</div>
+
+      <button class="print-btn" onclick="window.print()">🖨 Print / Save as PDF</button>
+
+      <!-- Security shields -->
+      <div class="shield-row">
+        <div class="shield-card">
+          <div class="shield-card-icon">🔐</div>
+          <div class="shield-card-title">Password Protected</div>
+          <div class="shield-card-desc">Two-step login with hashed passwords &amp; PIN</div>
+        </div>
+        <div class="shield-card">
+          <div class="shield-card-icon">🚫</div>
+          <div class="shield-card-title">No Data Stored</div>
+          <div class="shield-card-desc">Files processed in memory — nothing saved to disk</div>
+        </div>
+        <div class="shield-card">
+          <div class="shield-card-icon">🔑</div>
+          <div class="shield-card-title">Encrypted in Transit</div>
+          <div class="shield-card-desc">All traffic uses HTTPS / TLS encryption</div>
+        </div>
+        <div class="shield-card">
+          <div class="shield-card-icon">🛡️</div>
+          <div class="shield-card-title">Rate Limited</div>
+          <div class="shield-card-desc">Brute-force and abuse protection on every route</div>
+        </div>
+        <div class="shield-card">
+          <div class="shield-card-icon">🧾</div>
+          <div class="shield-card-title">No Third-Party Ads</div>
+          <div class="shield-card-desc">Zero advertising, tracking, or analytics scripts</div>
+        </div>
+        <div class="shield-card">
+          <div class="shield-card-icon">👤</div>
+          <div class="shield-card-title">Single User Only</div>
+          <div class="shield-card-desc">This tool is private — access is by invitation only</div>
+        </div>
+      </div>
+
+      <!-- How the site works -->
+      <div class="card privacy-section">
+        <h3>🏗 How Bulbring AI Works</h3>
+        <p>Bulbring AI is a private web application hosted on Render (a secure cloud platform). When you log in and use any of the tools, here is exactly what happens:</p>
+        <ul>
+          <li><strong>Login:</strong> You enter your username and password. Your password is never stored in plain text — it is hashed with bcrypt (a one-way encryption algorithm). Even the site operator cannot read your password. After your password is verified, you enter a private PIN. A short-lived session token (JWT) is issued and stored only in your browser's local storage.</li>
+          <li><strong>Bank Statement Analyzer &amp; Audit Risk Scorer:</strong> You upload a PDF. The file is loaded into server memory, text is extracted, and the text is sent to the Claude AI API. The PDF is never written to disk and is cleared from memory as soon as the response is returned. The resulting Excel file is sent directly to your browser.</li>
+          <li><strong>Receipt Scanner:</strong> You upload an image (JPEG, PNG, WebP). The image is sent to Claude AI Vision as a base64-encoded payload to extract line items. The image is not stored anywhere.</li>
+          <li><strong>AI Accountant Chat:</strong> Your typed questions are sent to Claude AI and a response is returned. Messages are held temporarily in your browser's memory for the length of your conversation and are cleared when you close the page or click "Clear".</li>
+          <li><strong>P&amp;L, HST, Invoice, Trial Balance:</strong> You enter numbers directly. These are processed server-side and an Excel file is generated and returned. No input data is retained.</li>
+          <li><strong>File History:</strong> Generated files are held in the server's working memory for the duration of the current server session so you can re-download them. This list resets every time the server restarts and is never written to a database or disk.</li>
+        </ul>
+      </div>
+
+      <!-- What data leaves the server -->
+      <div class="card privacy-section">
+        <h3>📤 What Data Leaves This Server</h3>
+        <p>Some data is sent to a third-party AI provider to power the AI features:</p>
+        <div class="highlight-box">
+          <strong>Anthropic (Claude AI API):</strong> When you use any AI-powered feature, the relevant text or image is transmitted to Anthropic's API over an encrypted (HTTPS/TLS) connection. Anthropic's API processes your request and returns a result. Anthropic's data retention policies apply — by default, API inputs and outputs are not used to train models and are subject to Anthropic's enterprise privacy terms. You can review Anthropic's privacy policy at <strong>anthropic.com/privacy</strong>.
+        </div>
+        <p>No other third parties receive your data. There are no analytics services, advertising networks, or data brokers involved.</p>
+      </div>
+
+      <!-- What is NOT stored -->
+      <div class="card privacy-section">
+        <h3>🗑 What Is Never Stored</h3>
+        <ul>
+          <li>Your uploaded PDF bank statements or receipt images are never saved to disk.</li>
+          <li>Transaction data extracted from your statements is never written to a database.</li>
+          <li>Generated Excel files are held only in server memory and cleared on restart.</li>
+          <li>Your chat messages with the AI Accountant are not logged or stored.</li>
+          <li>No cookies are used. Your session is stored only in your browser's local storage.</li>
+          <li>No IP addresses, usage logs, or browsing behaviour are tracked.</li>
+        </ul>
+      </div>
+
+      <!-- Security measures -->
+      <div class="card privacy-section">
+        <h3>🔐 Security Measures in Place</h3>
+        <ul>
+          <li><strong>HTTPS / TLS:</strong> All communication between your browser and this server is encrypted in transit. Any HTTP request is automatically redirected to HTTPS.</li>
+          <li><strong>Password hashing:</strong> Your login password is hashed with bcrypt (cost factor 12) before storage. It cannot be reversed or read.</li>
+          <li><strong>Two-step login:</strong> After entering your password, a second private PIN is required. This prevents access even if your password were ever compromised.</li>
+          <li><strong>JWT session tokens:</strong> Your session is represented by a signed JSON Web Token stored in browser local storage. Tokens expire automatically and are validated on every request.</li>
+          <li><strong>Rate limiting:</strong> All API routes are rate-limited to block brute-force attacks and prevent abuse. AI-powered routes have a tighter hourly limit.</li>
+          <li><strong>HTTP security headers:</strong> The server sets Helmet.js security headers including Content Security Policy, X-Frame-Options, X-Content-Type-Options, and Referrer-Policy to mitigate common web attacks.</li>
+          <li><strong>File type validation:</strong> Uploads are restricted to specific file types (PDF for statements, JPEG/PNG/WebP for receipts) and size limits. Invalid files are rejected before processing.</li>
+          <li><strong>Formula injection prevention:</strong> All user-supplied text written into Excel files is sanitized to prevent formula injection attacks.</li>
+          <li><strong>Single-user access:</strong> This application is configured for a single authorized user. There are no public registration endpoints.</li>
+        </ul>
+      </div>
+
+      <!-- Data hosted in -->
+      <div class="card privacy-section">
+        <h3>🌐 Where Your Data Is Hosted</h3>
+        <p>Bulbring AI is hosted on <strong>Render</strong> (render.com), a cloud hosting platform based in the United States with SOC 2 Type II certification. All server infrastructure uses encrypted storage and secure network configurations.</p>
+        <div class="warning-box">
+          <strong>Note for Canadian users:</strong> While this application is built for Canadian tax purposes (CRA T2125, HST/GST), the server infrastructure is located in the United States. Data transmitted to the server (including PDF contents) crosses international borders. If you have strict data residency requirements, please keep this in mind.
+        </div>
+      </div>
+
+      <!-- Your rights -->
+      <div class="card privacy-section">
+        <h3>✅ Your Rights &amp; Controls</h3>
+        <ul>
+          <li><strong>Delete your session at any time:</strong> Click "Sign Out" to immediately invalidate your session token.</li>
+          <li><strong>File history:</strong> The in-session file history resets automatically every time the server restarts. No permanent record is kept.</li>
+          <li><strong>No account to delete:</strong> Since this is a single-user private tool with no database of user accounts, there is no account profile to delete.</li>
+          <li><strong>Questions:</strong> For any privacy concerns, contact the site owner directly.</li>
+        </ul>
+      </div>
+
+      <!-- Summary -->
+      <div class="card privacy-section" style="border-top: 3px solid #047857;">
+        <h3 style="color: #047857; border-color: #9AE6B4;">🌿 The Short Version</h3>
+        <p>Your financial data is used <strong>only</strong> to generate the output you asked for. It is processed in memory, sent to Claude AI to power AI features, and then discarded. Nothing is sold, nothing is tracked, and nothing is permanently stored on this server. This is a private tool built for your use only.</p>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>
