@@ -53,16 +53,24 @@ router.post('/process', requireAuth, upload.array('statements', 20), async (req,
       results.push(analysis);
     }
 
-    // Merge all transactions and sort by date
+    // Merge all transactions, sort by date, then deduplicate
     const allTransactions = results.flatMap(r => r.transactions);
     allTransactions.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+    const seen = new Set();
+    const deduped = allTransactions.filter(tx => {
+      const key = `${tx.date}|${(tx.amount || 0).toFixed(2)}|${(tx.description || '').toLowerCase().trim()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 
     const starts  = results.map(r => r.period?.start).filter(Boolean).sort();
     const ends    = results.map(r => r.period?.end).filter(Boolean).sort();
     const banks   = [...new Set(results.map(r => r.period?.bank).filter(Boolean))];
 
     const mergedAnalysis = {
-      transactions: allTransactions,
+      transactions: deduped,
       period: {
         start:           starts[0] || null,
         end:             ends[ends.length - 1] || null,
