@@ -14,7 +14,7 @@
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-5 11.6V16h10v-2.4A7 7 0 0 0 12 2z" fill="rgba(255,255,255,0.95)"/><rect x="9" y="17.5" width="6" height="2" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="9.5" y="20.5" width="5" height="1.5" rx=".75" fill="rgba(255,255,255,0.5)"/></svg>
         </div>
         <h1>Bulbring AI</h1>
-        <p>Intelligent accounting platform.</p>
+        <p>Enter your PIN to continue.</p>
       </div>
 
       <div id="alert" class="alert"></div>
@@ -24,24 +24,7 @@
         </a>
       </div>
 
-      <!-- Step 1: username + password -->
-      <form id="login-form" autocomplete="off">
-        <div class="field">
-          <label for="username">Username</label>
-          <input id="username" type="text" placeholder="Username" required autocomplete="off" />
-        </div>
-        <div class="field">
-          <label for="password">Password</label>
-          <input id="password" type="password" placeholder="Password" required autocomplete="new-password" />
-        </div>
-        <button type="submit" class="btn btn-primary btn-full" id="login-btn">Sign In</button>
-      </form>
-
-      <!-- Step 2: SMS code (hidden until step 1 passes) -->
-      <form id="verify-form" style="display:none;">
-        <p style="font-size:13px;color:var(--muted);margin:0 0 18px;text-align:center;line-height:1.5;">
-          Enter your PIN to continue.
-        </p>
+      <form id="pin-form" autocomplete="off">
         <div class="field">
           <label for="code">PIN</label>
           <input id="code" type="password" inputmode="numeric"
@@ -49,8 +32,7 @@
                  autocomplete="off"
                  style="font-size:22px;letter-spacing:6px;text-align:center;" />
         </div>
-        <button type="submit" class="btn btn-primary btn-full" id="verify-btn">Verify</button>
-        <button type="button" class="btn btn-ghost btn-full" id="back-btn" style="margin-top:8px;">← Back</button>
+        <button type="submit" class="btn btn-primary btn-full" id="pin-btn">Sign In</button>
       </form>
     </div>
   </div>
@@ -63,92 +45,35 @@
       el.textContent = msg;
       el.className = `alert alert-${type} show`;
     }
-
     function clearAlert() {
-      const el = document.getElementById('alert');
-      el.className = 'alert';
+      document.getElementById('alert').className = 'alert';
     }
 
-    // ── Step 1: password ──────────────────────────────────────────────────────
-    document.getElementById('login-form').addEventListener('submit', async e => {
+    document.getElementById('code').focus();
+
+    document.getElementById('pin-form').addEventListener('submit', async e => {
       e.preventDefault();
       clearAlert();
-      const btn = document.getElementById('login-btn');
+      const btn  = document.getElementById('pin-btn');
+      const code = document.getElementById('code').value.trim();
       btn.disabled = true;
       btn.textContent = 'Signing in…';
 
       try {
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch('/api/auth/pin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: document.getElementById('username').value.trim(),
-            password: document.getElementById('password').value,
-          }),
+          body: JSON.stringify({ code }),
         });
 
         const data = await res.json();
 
         if (!res.ok) {
-          showAlert(data.error || 'Login failed');
+          showAlert(data.error || 'Invalid PIN');
           btn.disabled = false;
           btn.textContent = 'Sign In';
-          return;
-        }
-
-        // 2FA not configured — token returned directly
-        if (data.token) {
-          localStorage.setItem('token', data.token);
-          window.location.href = '/dashboard.html';
-          return;
-        }
-
-        // 2FA pending — show code entry step
-        if (data.pending) {
-          document.getElementById('login-form').style.display  = 'none';
-          document.getElementById('verify-form').style.display = 'block';
-          document.getElementById('code').focus();
-        }
-
-      } catch {
-        showAlert('Could not connect to server');
-        btn.disabled = false;
-        btn.textContent = 'Sign In';
-      }
-    });
-
-    // ── Step 2: SMS code ──────────────────────────────────────────────────────
-    document.getElementById('verify-form').addEventListener('submit', async e => {
-      e.preventDefault();
-      clearAlert();
-      const btn = document.getElementById('verify-btn');
-      btn.disabled = true;
-      btn.textContent = 'Verifying…';
-
-      try {
-        const res = await fetch('/api/auth/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code: document.getElementById('code').value.trim() }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          showAlert(data.error || 'Invalid code');
-          btn.disabled = false;
-          btn.textContent = 'Verify';
           document.getElementById('code').value = '';
           document.getElementById('code').focus();
-          // If the server killed the session, go back to step 1
-          if (res.status === 401 && data.error?.includes('sign in again')) {
-            setTimeout(() => {
-              document.getElementById('verify-form').style.display = 'none';
-              document.getElementById('login-form').style.display  = 'block';
-              document.getElementById('login-btn').disabled = false;
-              document.getElementById('login-btn').textContent = 'Sign In';
-            }, 2000);
-          }
           return;
         }
 
@@ -158,19 +83,8 @@
       } catch {
         showAlert('Could not connect to server');
         btn.disabled = false;
-        btn.textContent = 'Verify';
+        btn.textContent = 'Sign In';
       }
-    });
-
-    // Back button — return to step 1
-    document.getElementById('back-btn').addEventListener('click', () => {
-      clearAlert();
-      document.getElementById('verify-form').style.display = 'none';
-      document.getElementById('login-form').style.display  = 'block';
-      document.getElementById('login-btn').disabled = false;
-      document.getElementById('login-btn').textContent = 'Sign In';
-      document.getElementById('code').value = '';
-      document.getElementById('password').value = '';
     });
   </script>
 </body>

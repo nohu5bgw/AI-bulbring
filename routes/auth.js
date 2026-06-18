@@ -74,4 +74,19 @@ router.post('/verify', pinLimiter, (req, res) => {
   res.json({ token });
 });
 
+// ── POST /api/auth/pin — Single-step PIN login ───────────────────────────────
+router.post('/pin', pinLimiter, (req, res) => {
+  const { code } = req.body;
+
+  if (!code) return res.status(400).json({ error: 'PIN required' });
+  if (!process.env.APP_PIN) return res.status(500).json({ error: 'PIN not configured' });
+
+  if (code.trim() !== process.env.APP_PIN) {
+    return res.status(401).json({ error: 'Incorrect PIN' });
+  }
+
+  const token = jwt.sign({ username: process.env.APP_USERNAME }, process.env.JWT_SECRET, { expiresIn: '7d' });
+  res.json({ token });
+});
+
 module.exports = router;
