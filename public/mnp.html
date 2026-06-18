@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bank Writeup Agent — Bulbring AI</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .hero-card {
+      background: linear-gradient(135deg, #1b3a6b 0%, #2b5aa0 100%);
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+    .hero-card .pill {
+      display: inline-block;
+      font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+      background: rgba(255,255,255,.18);
+      color: #fff;
+      padding: 4px 10px; border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    .hero-card h2 { font-size: 28px; margin: 0 0 8px; color: #fff; }
+    .hero-card p  { margin: 0; color: rgba(255,255,255,.85); font-size: 15px; max-width: 640px; }
+
+    .download-row {
+      display: flex; align-items: center; gap: 14px;
+      margin-top: 22px; flex-wrap: wrap;
+    }
+    .btn-download {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #fff; color: #1b3a6b;
+      padding: 12px 22px; border-radius: 8px;
+      text-decoration: none; font-weight: 700; font-size: 15px;
+      transition: background .15s;
+    }
+    .btn-download:hover { background: #e7edf9; }
+    .platform-meta { font-size: 13px; color: rgba(255,255,255,.7); }
+
+    .steps-grid {
+      display: grid; gap: 14px;
+      grid-template-columns: 1fr;
+      margin-top: 4px;
+    }
+    @media (min-width: 720px) { .steps-grid { grid-template-columns: 1fr 1fr; } }
+    .step-row {
+      display: grid; grid-template-columns: 32px 1fr; gap: 12px;
+      align-items: start; padding: 12px; background: var(--bg);
+      border-radius: 8px;
+    }
+    .step-row .num {
+      width: 28px; height: 28px;
+      background: var(--navy); color: #fff;
+      border-radius: 6px; display: grid; place-items: center;
+      font-weight: 700; font-size: 13px;
+    }
+    .step-row h4 { margin: 0 0 4px; font-size: 14px; color: var(--text); }
+    .step-row p  { margin: 0; font-size: 13px; color: var(--sub); line-height: 1.5; }
+
+    .feat-grid {
+      display: grid; gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    .feat {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px;
+    }
+    .feat h4 { margin: 0 0 4px; font-size: 14px; color: var(--text); }
+    .feat p  { margin: 0; font-size: 13px; color: var(--sub); }
+
+    ol.install-list { padding-left: 22px; margin: 0; }
+    ol.install-list li { margin: 8px 0; color: var(--sub); font-size: 14px; line-height: 1.55; }
+    ol.install-list li strong { color: var(--text); }
+    code {
+      background: #edf2f7; border: 1px solid var(--border);
+      padding: 1px 6px; border-radius: 4px; font-size: 13px;
+    }
+    .small-note { font-size: 12px; color: var(--muted); margin-top: 12px; }
+  </style>
+</head>
+<body>
+
+  <nav class="topbar">
+    <a href="/dashboard.html" class="topbar-brand">
+      <div class="brand-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2a7 7 0 0 0-5 11.6V16h10v-2.4A7 7 0 0 0 12 2z" fill="rgba(255,255,255,0.95)"/><rect x="9" y="17.5" width="6" height="2" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="9.5" y="20.5" width="5" height="1.5" rx=".75" fill="rgba(255,255,255,0.5)"/></svg>
+      </div>
+      Bulbring AI
+    </a>
+    <div class="topbar-right">
+      <span class="topbar-email" id="user-label"></span>
+      <button class="btn-topbar-logout" id="logout-btn">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="main">
+
+    <div class="breadcrumb">
+      <a href="/dashboard.html">Dashboard</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Bank Writeup Agent</span>
+    </div>
+
+    <div class="hero-card">
+      <span class="pill">AI agent &middot; for MNP LLP</span>
+      <h2>Bank Writeup Agent</h2>
+      <p>Drop in an RBC Visa statement (PDF or Excel). The agent parses every transaction, auto-categorizes to CRA expense codes, and exports a fully formatted MNP-branded writeup Excel — all running locally on your computer.</p>
+      <div class="download-row">
+        <a class="btn-download" href="/downloads/MNP_BankWriteup_Windows.zip" download>
+          ⬇ &nbsp; Download for Windows
+        </a>
+        <span class="platform-meta">.zip &middot; 33&nbsp;KB &middot; Windows 10 / 11</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">How the agent works</div>
+      <div class="steps-grid">
+        <div class="step-row">
+          <div class="num">1</div>
+          <div>
+            <h4>Drop in a statement</h4>
+            <p>Browse to your RBC Visa PDF or Excel export. The agent reads every line — dates, descriptions, foreign currency, exchange rates, cardholder names.</p>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="num">2</div>
+          <div>
+            <h4>Auto-categorize</h4>
+            <p>Each transaction is matched to a CRA-style category (meals, office, vehicle, travel, etc.). Anything uncertain is flagged orange so you can review it.</p>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="num">3</div>
+          <div>
+            <h4>Review &amp; edit inline</h4>
+            <p>Click any description or category to edit. Subtotals update on the fly. Payments are colour-coded green for quick visual reconciliation.</p>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="num">4</div>
+          <div>
+            <h4>Export the writeup</h4>
+            <p>One click generates a two-sheet Excel: full detail with cardholder subtotals plus a one-page category Summary — ready for the working paper file.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">What you get</div>
+      <div class="feat-grid">
+        <div class="feat"><h4>Two-sheet Excel</h4><p>Detailed writeup + category summary, MNP-branded.</p></div>
+        <div class="feat"><h4>Cardholder subtotals</h4><p>Primary &amp; supplementary cards grouped automatically.</p></div>
+        <div class="feat"><h4>FX handling</h4><p>Foreign currency, exchange rate &amp; CAD preserved.</p></div>
+        <div class="feat"><h4>Mismatch warnings</h4><p>Flags if parsed totals don&rsquo;t reconcile to the statement.</p></div>
+        <div class="feat"><h4>Offline &amp; private</h4><p>Runs locally. No client data leaves the machine.</p></div>
+        <div class="feat"><h4>Plain .xlsx</h4><p>No macros. Opens in any version of Excel.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Install &amp; first run</div>
+      <ol class="install-list">
+        <li>Right-click the downloaded zip and choose <strong>Extract All</strong>.</li>
+        <li>Open the extracted folder and double-click <code>Run.bat</code>.</li>
+        <li>If Python isn&rsquo;t installed, the launcher opens the Python download page. Install Python 3.11+ and <strong>tick &ldquo;Add Python to PATH&rdquo;</strong> during install, then run <code>Run.bat</code> again.</li>
+        <li>First run takes about a minute (installing the libraries). Subsequent launches open instantly.</li>
+      </ol>
+      <p class="small-note">If Windows SmartScreen warns about <code>Run.bat</code>, click <em>More info &rarr; Run anyway</em>. It&rsquo;s a plain text launcher you can open in Notepad to inspect.</p>
+    </div>
+
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (token) {
+      document.getElementById('user-label').textContent = 'Virtualpostman2007';
+    }
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      window.location.href = '/';
+    });
+  </script>
+
+</body>
+</html>
