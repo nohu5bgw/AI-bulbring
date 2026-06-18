@@ -109,10 +109,10 @@
       <h2>Bank Writeup Agent</h2>
       <p>Drop in an RBC Visa statement (PDF or Excel). The agent parses every transaction, auto-categorizes to CRA expense codes, and exports a fully formatted MNP-branded writeup Excel — all running locally on your computer.</p>
       <div class="download-row">
-        <a class="btn-download" href="/downloads/MNP_BankWriteup_Windows.zip" download>
+        <a class="btn-download" href="/downloads/MNP_BankWriteup.exe" download>
           ⬇ &nbsp; Download for Windows
         </a>
-        <span class="platform-meta">.zip &middot; 33&nbsp;KB &middot; Windows 10 / 11</span>
+        <span class="platform-meta">.exe &middot; Windows 10 / 11 &middot; no install needed</span>
       </div>
     </div>
 
@@ -165,12 +165,11 @@
     <div class="card">
       <div class="card-title">Install &amp; first run</div>
       <ol class="install-list">
-        <li>Right-click the downloaded zip and choose <strong>Extract All</strong>.</li>
-        <li>Open the extracted folder and double-click <code>Run.bat</code>.</li>
-        <li>If Python isn&rsquo;t installed, the launcher opens the Python download page. Install Python 3.11+ and <strong>tick &ldquo;Add Python to PATH&rdquo;</strong> during install, then run <code>Run.bat</code> again.</li>
-        <li>First run takes about a minute (installing the libraries). Subsequent launches open instantly.</li>
+        <li>Click <strong>Download for Windows</strong>. Your browser saves <code>MNP_BankWriteup.exe</code> &mdash; usually to your Downloads folder.</li>
+        <li>Drag it to your <strong>Desktop</strong> (or wherever you want it to live).</li>
+        <li><strong>Double-click the icon</strong> to launch the app. That&rsquo;s it &mdash; no install, no setup, no Python required.</li>
       </ol>
-      <p class="small-note">If Windows SmartScreen warns about <code>Run.bat</code>, click <em>More info &rarr; Run anyway</em>. It&rsquo;s a plain text launcher you can open in Notepad to inspect.</p>
+      <p class="small-note">First launch may take a few seconds while Windows unpacks the bundled libraries. If SmartScreen warns about an unrecognized publisher, click <em>More info &rarr; Run anyway</em> &mdash; the app is unsigned because it&rsquo;s an internal build.</p>
     </div>
 
   </div>
