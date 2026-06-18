@@ -8,13 +8,21 @@ and the prompt/Excel output stay in lockstep with the website.
 
 import json
 import os
+import ssl
 import urllib.request
 import urllib.error
 import uuid
 from pathlib import Path
 
+import certifi
+
 API_BASE_DEFAULT = "https://bulbringai.com"
 TOKEN_PATH       = Path.home() / ".mnp_bankwriteup" / "token.json"
+
+# PyInstaller-bundled Python has no access to the system cert store on macOS,
+# so HTTPS calls fail with CERTIFICATE_VERIFY_FAILED. We force certifi's
+# Mozilla CA bundle, which we collect-data into the binary at build time.
+_SSL_CONTEXT = ssl.create_default_context(cafile=certifi.where())
 
 
 def api_base() -> str:
@@ -64,7 +72,7 @@ def sign_in_with_pin(pin: str) -> str:
         method="POST",
     )
     try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
+        with urllib.request.urlopen(req, timeout=15, context=_SSL_CONTEXT) as resp:
             data = json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         try:
@@ -142,7 +150,7 @@ def process_statements(
     )
 
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with urllib.request.urlopen(req, timeout=timeout, context=_SSL_CONTEXT) as resp:
             xlsx = resp.read()
             headers = resp.headers
             meta = {

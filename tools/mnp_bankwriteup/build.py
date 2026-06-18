@@ -26,6 +26,7 @@ def main():
         "--name", "MNP_BankWriteup",
         "--collect-all", "customtkinter",
         "--collect-data", "pdfplumber",
+        "--collect-data", "certifi",
         "--hidden-import", "pdfplumber",
         "--hidden-import", "openpyxl",
         "--hidden-import", "PIL",
