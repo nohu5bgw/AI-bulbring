@@ -48,10 +48,10 @@ def main():
     result = subprocess.run(cmd, cwd=str(HERE))
 
     if result.returncode == 0:
-        print("\n✓ Build complete.")
+        print("\n[OK] Build complete.")
         print(f"  Output: {HERE / 'dist' / 'MNP_BankWriteup'}")
     else:
-        print("\n✗ Build failed — see output above.")
+        print("\n[FAIL] Build failed -- see output above.")
         sys.exit(1)
 
 
