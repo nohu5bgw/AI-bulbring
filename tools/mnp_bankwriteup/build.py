@@ -19,16 +19,22 @@ def main():
 
     cmd = [
         sys.executable, "-m", "PyInstaller",
+        "--noconfirm",
+        "--clean",
         "--onefile",
         "--windowed",
         "--name", "MNP_BankWriteup",
-        "--add-data", f"{assets}{os.pathsep}assets",
-        "--hidden-import", "customtkinter",
+        "--collect-all", "customtkinter",
+        "--collect-data", "pdfplumber",
         "--hidden-import", "pdfplumber",
         "--hidden-import", "openpyxl",
         "--hidden-import", "PIL",
         "--hidden-import", "PIL._tkinter_finder",
     ]
+
+    # Only bundle the assets folder if it actually contains files
+    if assets.exists() and any(assets.iterdir()):
+        cmd += ["--add-data", f"{assets}{os.pathsep}assets"]
 
     if sys.platform == "darwin" and icon_mac.exists():
         cmd += ["--icon", str(icon_mac)]
