@@ -102,6 +102,11 @@ router.post('/process', requireAuth, upload.array('statements', 20), async (req,
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'Content-Disposition': `attachment; filename="${filename}"`,
       'Content-Length': excelBuffer.length,
+      'Access-Control-Expose-Headers': 'X-Transaction-Count, X-Statement-Count, X-Period-Start, X-Period-End',
+      'X-Transaction-Count': String(txCount),
+      'X-Statement-Count': String(req.files.length),
+      'X-Period-Start': mergedAnalysis.period.start || '',
+      'X-Period-End': mergedAnalysis.period.end || '',
     });
 
     res.send(excelBuffer);

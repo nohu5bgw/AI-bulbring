@@ -240,7 +240,7 @@ class WriteupPage(ctk.CTkFrame):
             self._gen_btn.configure(state="disabled")
             self._status_var.set("Add statements to get started.")
 
-    # ── Parse + export pipeline ───────────────────────────────────────────────
+    # ── Upload + AI pipeline (backend-powered) ────────────────────────────────
 
     def _generate(self):
         if not self._files:
@@ -256,77 +256,82 @@ class WriteupPage(ctk.CTkFrame):
         if not save_path:
             return
 
+        # Ensure we're signed in before uploading.
+        import api_client
+        if not api_client.get_token():
+            if not self._prompt_pin():
+                return
+
         self._gen_btn.configure(state="disabled")
         self._progress.set(0)
         self._progress.grid()
-        self._status_var.set("Parsing statements…")
+        self._status_var.set("Uploading statements to AI agent…")
 
-        files   = list(self._files)
-        total   = len(files)
-        results = {}
-        done    = [0]
-
-        def parse_one(path):
-            try:
-                from parser.generic_parser import parse_file
-                data = parse_file(path, label=Path(path).name)
-                results[path] = data
-            except Exception as e:
-                results[path] = e
-
-            with self._parse_lock:
-                done[0] += 1
-                prog = done[0] / total
-                self.after(0, lambda p=prog: self._progress.set(p))
-                if done[0] == total:
-                    self.after(0, lambda: self._export(results, save_path, files))
-
-        for f in files:
-            threading.Thread(target=parse_one, args=(f,), daemon=True).start()
-
-    def _export(self, results: dict, save_path: str, ordered: list):
-        self._status_var.set("Building Excel…")
-
-        stmts   = []
-        errors  = []
-        for path in ordered:
-            r = results.get(path)
-            if isinstance(r, Exception):
-                errors.append(f"{Path(path).name}: {r}")
-            elif r:
-                stmts.append(r)
-
-        if not stmts:
-            self._progress.grid_remove()
-            self._gen_btn.configure(state="normal")
-            messagebox.showerror("Parse failed",
-                                 "Could not parse any statements.\n\n" + "\n".join(errors))
-            self._status_var.set("Parse failed — check file formats.")
-            return
+        files = list(self._files)
 
         def worker():
             try:
-                from exporter.excel_exporter import export_excel
-                export_excel(stmts, save_path)
+                token = api_client.get_token()
+                if not token:
+                    self.after(0, lambda: self._fail("Not signed in"))
+                    return
+
+                xlsx_bytes, meta = api_client.process_statements(files, token)
+
+                self.after(0, lambda p=0.85: self._progress.set(p))
+
+                with open(save_path, "wb") as fh:
+                    fh.write(xlsx_bytes)
 
                 # Save to local record store
                 import store
-                n_txns = sum(len(s.transactions) for s in stmts)
+                fallback_name = Path(files[0]).stem if files else "Writeup"
                 store.add_record(
-                    client_name   = stmts[0].client_name if stmts else "",
-                    client_number = "",
-                    file_path     = save_path,
-                    statement_count   = len(stmts),
-                    transaction_count = n_txns,
+                    client_name       = fallback_name,
+                    client_number     = "",
+                    file_path         = save_path,
+                    statement_count   = meta.get("statement_count", len(files)),
+                    transaction_count = meta.get("transaction_count", 0),
                 )
 
-                self.after(0, lambda: self._done(save_path, errors))
+                self.after(0, lambda: self._done(save_path, []))
+
+            except api_client.AuthError as e:
+                msg = str(e)
+                self.after(0, lambda: self._auth_failed(msg))
+            except api_client.ApiError as e:
+                msg = str(e)
+                self.after(0, lambda: self._fail(msg))
             except Exception as e:
                 tb = traceback.format_exc()
                 print(tb)
-                self.after(0, lambda: self._fail(str(e)))
+                msg = str(e) or "Unknown error"
+                self.after(0, lambda: self._fail(msg))
 
         threading.Thread(target=worker, daemon=True).start()
+
+    def _prompt_pin(self) -> bool:
+        """Modal PIN entry. Returns True if a valid token was obtained."""
+        import api_client
+        dlg = ctk.CTkInputDialog(
+            title="Sign in to Bulbring AI",
+            text="Enter your PIN to use the AI agent:",
+        )
+        pin = dlg.get_input()
+        if not pin:
+            return False
+        try:
+            api_client.sign_in_with_pin(pin.strip())
+            return True
+        except api_client.AuthError as e:
+            messagebox.showerror("Sign-in failed", str(e))
+            return False
+
+    def _auth_failed(self, msg: str):
+        self._progress.grid_remove()
+        self._gen_btn.configure(state="normal")
+        self._status_var.set("Sign in required.")
+        messagebox.showwarning("Sign-in required", msg)
 
     def _done(self, save_path: str, errors: list):
         self._progress.grid_remove()
@@ -436,12 +441,12 @@ class SearchPage(ctk.CTkFrame):
             self._render_card(r)
 
     def _render_card(self, r: dict):
-        card = ctk.CTkFrame(self._results_frame, fg_color=WHITE, corner_radius=4)
-        card.pack(fill="x", pady=2)
+        card = ctk.CTkFrame(self._results_frame, fg_color=WHITE, corner_radius=3)
+        card.pack(fill="x", pady=1)
         card.grid_columnconfigure(1, weight=1)
 
-        ctk.CTkFrame(card, fg_color=MNP_GREEN, width=4, corner_radius=2).grid(
-            row=0, column=0, sticky="ns", padx=(0, 8), pady=4,
+        ctk.CTkFrame(card, fg_color=MNP_GREEN, width=3, corner_radius=1).grid(
+            row=0, column=0, sticky="ns", padx=(0, 6), pady=2,
         )
 
         name    = r.get("client_name") or "Unknown Client"
@@ -454,33 +459,33 @@ class SearchPage(ctk.CTkFrame):
 
         ctk.CTkLabel(
             card, text=meta,
-            font=ctk.CTkFont(family="Calibri", size=10),
+            font=ctk.CTkFont(family="Calibri", size=9),
             text_color=MNP_BLACK, anchor="w",
-        ).grid(row=0, column=1, sticky="ew", padx=(0, 4), pady=5)
+        ).grid(row=0, column=1, sticky="ew", padx=(0, 4), pady=2)
 
         path        = r.get("file_path", "")
         file_exists = Path(path).exists() if path else False
 
         ctk.CTkButton(
             card, text="Open",
-            font=ctk.CTkFont(family="Calibri", size=10),
-            width=48, height=22,
+            font=ctk.CTkFont(family="Calibri", size=9),
+            width=42, height=18,
             fg_color=MNP_GREEN if file_exists else MNP_GREY,
             hover_color=MNP_GREEN2 if file_exists else MNP_GREY,
             text_color=WHITE if file_exists else TEXT_DIM,
             state="normal" if file_exists else "disabled",
             command=lambda p=path: _open_file(p),
-        ).grid(row=0, column=2, padx=3, pady=4)
+        ).grid(row=0, column=2, padx=2, pady=2)
 
         ctk.CTkButton(
             card, text="📁",
-            font=ctk.CTkFont(size=11),
-            width=26, height=22,
+            font=ctk.CTkFont(size=10),
+            width=22, height=18,
             fg_color="transparent", hover_color=MNP_GREY,
             text_color=MNP_GREEN if file_exists else TEXT_DIM,
             state="normal" if file_exists else "disabled",
             command=lambda p=path: self._reveal(p),
-        ).grid(row=0, column=3, padx=(0, 8), pady=4)
+        ).grid(row=0, column=3, padx=(0, 6), pady=2)
 
     def _reveal(self, path: str):
         import subprocess
