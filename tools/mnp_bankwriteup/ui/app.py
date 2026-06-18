@@ -441,12 +441,18 @@ class SearchPage(ctk.CTkFrame):
             self._render_card(r)
 
     def _render_card(self, r: dict):
-        card = ctk.CTkFrame(self._results_frame, fg_color=WHITE, corner_radius=3)
+        # Lock each row to a small fixed height — CTkFrame's default is
+        # several hundred px tall otherwise, which makes results look giant.
+        card = ctk.CTkFrame(self._results_frame, fg_color=WHITE,
+                            corner_radius=3, height=26)
         card.pack(fill="x", pady=1)
+        card.pack_propagate(False)
+        card.grid_propagate(False)
         card.grid_columnconfigure(1, weight=1)
+        card.grid_rowconfigure(0, weight=1)
 
         ctk.CTkFrame(card, fg_color=MNP_GREEN, width=3, corner_radius=1).grid(
-            row=0, column=0, sticky="ns", padx=(0, 6), pady=2,
+            row=0, column=0, sticky="ns", padx=(0, 6), pady=3,
         )
 
         name    = r.get("client_name") or "Unknown Client"
@@ -459,33 +465,33 @@ class SearchPage(ctk.CTkFrame):
 
         ctk.CTkLabel(
             card, text=meta,
-            font=ctk.CTkFont(family="Calibri", size=9),
+            font=ctk.CTkFont(family="Calibri", size=10),
             text_color=MNP_BLACK, anchor="w",
-        ).grid(row=0, column=1, sticky="ew", padx=(0, 4), pady=2)
+        ).grid(row=0, column=1, sticky="ew", padx=(0, 4))
 
         path        = r.get("file_path", "")
         file_exists = Path(path).exists() if path else False
 
         ctk.CTkButton(
             card, text="Open",
-            font=ctk.CTkFont(family="Calibri", size=9),
-            width=42, height=18,
+            font=ctk.CTkFont(family="Calibri", size=10),
+            width=46, height=20,
             fg_color=MNP_GREEN if file_exists else MNP_GREY,
             hover_color=MNP_GREEN2 if file_exists else MNP_GREY,
             text_color=WHITE if file_exists else TEXT_DIM,
             state="normal" if file_exists else "disabled",
             command=lambda p=path: _open_file(p),
-        ).grid(row=0, column=2, padx=2, pady=2)
+        ).grid(row=0, column=2, padx=2)
 
         ctk.CTkButton(
             card, text="📁",
-            font=ctk.CTkFont(size=10),
-            width=22, height=18,
+            font=ctk.CTkFont(size=11),
+            width=24, height=20,
             fg_color="transparent", hover_color=MNP_GREY,
             text_color=MNP_GREEN if file_exists else TEXT_DIM,
             state="normal" if file_exists else "disabled",
             command=lambda p=path: self._reveal(p),
-        ).grid(row=0, column=3, padx=(0, 6), pady=2)
+        ).grid(row=0, column=3, padx=(0, 6))
 
     def _reveal(self, path: str):
         import subprocess
