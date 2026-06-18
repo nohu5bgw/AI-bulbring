@@ -1,0 +1,103 @@
+184 INFO: PyInstaller: 6.21.0, contrib hooks: 2026.6
+184 INFO: Python: 3.11.9
+192 INFO: Platform: Windows-10-10.0.26100-SP0
+192 INFO: Python environment: C:\hostedtoolcache\windows\Python\3.11.9\x64
+194 INFO: wrote D:\a\AI-bulbring\AI-bulbring\tools\mnp_bankwriteup\MNP_BankWriteup.spec
+196 INFO: Removing temporary files and cleaning cache in C:\Users\runneradmin\AppData\Local\pyinstaller
+1078 INFO: Module search paths (PYTHONPATH):
+['D:\\a\\AI-bulbring\\AI-bulbring\\tools\\mnp_bankwriteup',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\python311.zip',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\DLLs',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64',
+ 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages',
+ 'D:\\a\\AI-bulbring\\AI-bulbring\\tools\\mnp_bankwriteup']
+1277 INFO: Appending 'datas' from .spec
+1282 INFO: checking Analysis
+1282 INFO: Building Analysis because Analysis-00.toc is non existent
+1282 INFO: Looking for Python shared library...
+1282 INFO: Using Python shared library: C:\hostedtoolcache\windows\Python\3.11.9\x64\python311.dll
+1282 INFO: Running Analysis Analysis-00.toc
+1282 INFO: Target bytecode optimization level: 0
+1282 INFO: Initializing module dependency graph...
+1294 INFO: Initializing module graph hook caches...
+1310 INFO: Analyzing modules for base_library.zip ...
+1909 INFO: Processing standard module hook 'hook-heapq.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+2194 INFO: Processing standard module hook 'hook-encodings.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+3744 INFO: Processing standard module hook 'hook-math.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+3859 INFO: Processing standard module hook 'hook-pickle.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+5845 INFO: Caching module dependency graph...
+5881 INFO: Analyzing D:\a\AI-bulbring\AI-bulbring\tools\mnp_bankwriteup\main.py
+5898 INFO: Processing pre-find-module-path hook 'hook-tkinter.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\pre_find_module_path'
+5900 INFO: TclTkInfo: initializing cached Tcl/Tk info...
+6734 INFO: Processing standard module hook 'hook-_tkinter.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+6770 INFO: Processing standard module hook 'hook-customtkinter.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+6877 INFO: Processing standard module hook 'hook-platform.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+6901 INFO: Processing standard module hook 'hook-_ctypes.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+6907 INFO: Processing pre-safe-import-module hook 'hook-packaging.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+6907 INFO: SetuptoolsInfo: initializing cached setuptools info...
+9382 INFO: Processing pre-safe-import-module hook 'hook-typing_extensions.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+9650 INFO: Processing standard module hook 'hook-PIL.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+9736 INFO: Processing standard module hook 'hook-PIL.Image.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+10030 INFO: Processing standard module hook 'hook-xml.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+10052 INFO: Processing standard module hook 'hook-xml.etree.cElementTree.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+10212 INFO: Processing standard module hook 'hook-PIL.ImageFilter.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+10710 INFO: Processing standard module hook 'hook-pdfminer.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+10902 INFO: Processing standard module hook 'hook-difflib.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+11144 INFO: Processing standard module hook 'hook-multiprocessing.util.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+12561 INFO: Processing standard module hook 'hook-cryptography.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+13571 INFO: hook-cryptography: cryptography does not seem to be using dynamically linked OpenSSL.
+13706 INFO: Processing standard module hook 'hook-charset_normalizer.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+14181 INFO: Processing standard module hook 'hook-pypdfium2.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+14203 INFO: Processing standard module hook 'hook-pypdfium2_raw.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+14417 INFO: Processing standard module hook 'hook-openpyxl.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+15521 INFO: Analyzing hidden import 'PIL._tkinter_finder'
+15523 INFO: Processing module hooks (post-graph stage)...
+15773 INFO: Processing standard module hook 'hook-PIL.SpiderImagePlugin.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+16047 INFO: Processing standard module hook 'hook-_tkinter.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks'
+16060 INFO: Performing binary vs. data reclassification (1145 entries)
+18392 INFO: Looking for ctypes DLLs
+18409 WARNING: Ignoring AppKit.framework/AppKit imported from C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\darkdetect\_mac_detect.py - only basenames are supported with ctypes imports!
+18517 INFO: Analyzing run-time hooks ...
+18519 INFO: Including run-time hook 'pyi_rth__tkinter.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+18521 INFO: Including run-time hook 'pyi_rth_inspect.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+18523 INFO: Including run-time hook 'pyi_rth_cryptography_openssl.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\rthooks'
+18525 INFO: Including run-time hook 'pyi_rth_pkgutil.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+18527 INFO: Including run-time hook 'pyi_rth_multiprocessing.py' from 'C:\\hostedtoolcache\\windows\\Python\\3.11.9\\x64\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+18557 INFO: Creating base_library.zip...
+18577 INFO: Looking for dynamic libraries
+19340 INFO: Extra DLL search directories (AddDllDirectory): []
+19340 INFO: Extra DLL search directories (PATH): []
+20557 INFO: Warnings written to D:\a\AI-bulbring\AI-bulbring\tools\mnp_bankwriteup\build\MNP_BankWriteup\warn-MNP_BankWriteup.txt
+20622 INFO: Graph cross-reference written to D:\a\AI-bulbring\AI-bulbring\tools\mnp_bankwriteup\build\MNP_BankWriteup\xref-MNP_BankWriteup.html
+20669 INFO: checking PYZ
+20672 INFO: Building PYZ because PYZ-00.toc is non existent
+20672 INFO: Building PYZ (ZlibArchive) D:\a\AI-bulbring\AI-bulbring\tools\mnp_bankwriteup\build\MNP_BankWriteup\PYZ-00.pyz
+21169 INFO: Building PYZ (ZlibArchive) D:\a\AI-bulbring\AI-bulbring\tools\mnp_bankwriteup\build\MNP_BankWriteup\PYZ-00.pyz completed successfully.
+21206 INFO: checking PKG
+21206 INFO: Building PKG because PKG-00.toc is non existent
+21206 INFO: Building PKG (CArchive) MNP_BankWriteup.pkg
+31092 INFO: Building PKG (CArchive) MNP_BankWriteup.pkg completed successfully.
+31116 INFO: Bootloader C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\site-packages\PyInstaller\bootloader\Windows-64bit-intel\runw.exe
+31116 INFO: checking EXE
+31116 INFO: Building EXE because EXE-00.toc is non existent
+31116 INFO: Building EXE from EXE-00.toc
+31116 INFO: Copying bootloader EXE to D:\a\AI-bulbring\AI-bulbring\tools\mnp_bankwriteup\dist\MNP_BankWriteup.exe
+31118 INFO: Copying icon to EXE
+31120 INFO: Copying 0 resources to EXE
+31120 INFO: Embedding manifest in EXE
+31122 INFO: Appending PKG archive to EXE
+31142 INFO: Fixing EXE headers
+31313 INFO: Building EXE from EXE-00.toc completed successfully.
+31334 INFO: Build complete! The results are available in: D:\a\AI-bulbring\AI-bulbring\tools\mnp_bankwriteup\dist
+Running PyInstaller…
+C:\hostedtoolcache\windows\Python\3.11.9\x64\python.exe -m PyInstaller --noconfirm --clean --onefile --windowed --name MNP_BankWriteup --collect-all customtkinter --collect-data pdfplumber --hidden-import pdfplumber --hidden-import openpyxl --hidden-import PIL --hidden-import PIL._tkinter_finder main.py
+Traceback (most recent call last):
+  File "D:\a\AI-bulbring\AI-bulbring\tools\mnp_bankwriteup\build.py", line 59, in <module>
+    main()
+  File "D:\a\AI-bulbring\AI-bulbring\tools\mnp_bankwriteup\build.py", line 51, in main
+    print("\n\u2713 Build complete.")
+  File "C:\hostedtoolcache\windows\Python\3.11.9\x64\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2713' in position 2: character maps to <undefined>
