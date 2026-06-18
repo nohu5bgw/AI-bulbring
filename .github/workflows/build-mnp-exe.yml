@@ -1,4 +1,4 @@
-name: Build MNP Bank Writeup EXE
+name: Build MNP Bank Writeup
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
     defaults:
       run:
@@ -43,37 +43,107 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           mkdir -p _buildlogs
-          cp tools/mnp_bankwriteup/build_log.txt _buildlogs/latest_build_log.txt
+          cp tools/mnp_bankwriteup/build_log.txt _buildlogs/latest_windows_build_log.txt
+          git pull --rebase origin main || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add _buildlogs/latest_build_log.txt
-          git commit -m "Capture failed build log [skip ci]" || true
+          git add _buildlogs/latest_windows_build_log.txt
+          git commit -m "Capture failed Windows build log [skip ci]" || true
           git push || true
 
-      - name: Copy EXE into site downloads
-        shell: bash
-        working-directory: ${{ github.workspace }}
-        run: |
-          mkdir -p public/downloads
-          cp tools/mnp_bankwriteup/dist/MNP_BankWriteup.exe public/downloads/MNP_BankWriteup.exe
-          ls -lh public/downloads/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mnp-windows
+          path: tools/mnp_bankwriteup/dist/MNP_BankWriteup.exe
 
-      - name: Commit and push updated EXE
+  build-macos:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: tools/mnp_bankwriteup
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build .app
+        shell: bash
+        run: |
+          python build.py > build_log.txt 2>&1
+          status=$?
+          cat build_log.txt
+          exit $status
+
+      - name: Zip .app bundle
+        shell: bash
+        run: |
+          cd dist
+          if [ -d "MNP_BankWriteup.app" ]; then
+            zip -r MNP_BankWriteup_Mac.zip MNP_BankWriteup.app
+          else
+            echo "No .app produced — falling back to bare binary"
+            zip -r MNP_BankWriteup_Mac.zip MNP_BankWriteup
+          fi
+          ls -lh
+
+      - name: Commit build log on failure
+        if: failure()
         shell: bash
         working-directory: ${{ github.workspace }}
         run: |
+          mkdir -p _buildlogs
+          cp tools/mnp_bankwriteup/build_log.txt _buildlogs/latest_macos_build_log.txt
+          git pull --rebase origin main || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/downloads/MNP_BankWriteup.exe
+          git add _buildlogs/latest_macos_build_log.txt
+          git commit -m "Capture failed macOS build log [skip ci]" || true
+          git push || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mnp-macos
+          path: tools/mnp_bankwriteup/dist/MNP_BankWriteup_Mac.zip
+
+  publish:
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: mnp-windows
+          path: artifacts/win
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: mnp-macos
+          path: artifacts/mac
+
+      - name: Stage binaries into public/downloads
+        run: |
+          mkdir -p public/downloads
+          cp artifacts/win/MNP_BankWriteup.exe public/downloads/MNP_BankWriteup.exe
+          cp artifacts/mac/MNP_BankWriteup_Mac.zip public/downloads/MNP_BankWriteup_Mac.zip
+          ls -lh public/downloads/
+
+      - name: Commit and push binaries
+        run: |
+          git pull --rebase origin main || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/downloads/MNP_BankWriteup.exe public/downloads/MNP_BankWriteup_Mac.zip
           if git diff --cached --quiet; then
-            echo "No EXE changes to commit."
+            echo "No binary changes."
           else
-            git commit -m "Build MNP_BankWriteup.exe [skip ci]"
+            git commit -m "Build MNP_BankWriteup binaries (Windows + macOS) [skip ci]"
             git push
           fi
-
-      - name: Upload EXE artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: MNP_BankWriteup-Windows-EXE
-          path: tools/mnp_bankwriteup/dist/MNP_BankWriteup.exe

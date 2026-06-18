@@ -112,7 +112,12 @@
         <a class="btn-download" href="/downloads/MNP_BankWriteup.exe" download>
           ⬇ &nbsp; Download for Windows
         </a>
-        <span class="platform-meta">.exe &middot; Windows 10 / 11 &middot; no install needed</span>
+        <a class="btn-download" href="/downloads/MNP_BankWriteup_Mac.zip" download>
+          ⬇ &nbsp; Download for Mac
+        </a>
+      </div>
+      <div class="platform-meta" style="margin-top:10px;">
+        Windows 10 / 11 (.exe) &nbsp;&middot;&nbsp; macOS 12+ (.zip with .app) &nbsp;&middot;&nbsp; no install needed
       </div>
     </div>
 
@@ -163,13 +168,23 @@
     </div>
 
     <div class="card">
-      <div class="card-title">Install &amp; first run</div>
+      <div class="card-title">Install &amp; first run &mdash; Windows</div>
       <ol class="install-list">
         <li>Click <strong>Download for Windows</strong>. Your browser saves <code>MNP_BankWriteup.exe</code> &mdash; usually to your Downloads folder.</li>
         <li>Drag it to your <strong>Desktop</strong> (or wherever you want it to live).</li>
-        <li><strong>Double-click the icon</strong> to launch the app. That&rsquo;s it &mdash; no install, no setup, no Python required.</li>
+        <li><strong>Double-click the icon</strong> to launch the app. No install, no setup, no Python required.</li>
       </ol>
       <p class="small-note">First launch may take a few seconds while Windows unpacks the bundled libraries. If SmartScreen warns about an unrecognized publisher, click <em>More info &rarr; Run anyway</em> &mdash; the app is unsigned because it&rsquo;s an internal build.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Install &amp; first run &mdash; macOS</div>
+      <ol class="install-list">
+        <li>Click <strong>Download for Mac</strong>. Your browser saves <code>MNP_BankWriteup_Mac.zip</code>.</li>
+        <li><strong>Double-click the zip</strong> to extract it. You&rsquo;ll get <code>MNP_BankWriteup.app</code>. Drag it to your <strong>Applications</strong> folder (or Desktop).</li>
+        <li><strong>First launch only:</strong> right-click the app &rarr; <em>Open</em> &rarr; click <em>Open</em> in the dialog. After that you can double-click normally.</li>
+      </ol>
+      <p class="small-note">macOS Gatekeeper blocks unsigned apps by default. The right-click &rarr; Open dance is a one-time bypass &mdash; needed because the build isn&rsquo;t signed with an Apple Developer ID. If you see <em>&ldquo;cannot be opened because Apple cannot check it for malicious software&rdquo;</em>, go to <em>System Settings &rarr; Privacy &amp; Security</em> and click <em>Open Anyway</em>.</p>
     </div>
 
   </div>
