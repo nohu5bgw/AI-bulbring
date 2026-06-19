@@ -25,12 +25,17 @@ def main():
         "--windowed",
         "--name", "MNP_BankWriteup",
         "--collect-all", "customtkinter",
-        "--collect-data", "pdfplumber",
+        "--collect-all", "pdfplumber",
         "--collect-data", "certifi",
         "--hidden-import", "pdfplumber",
         "--hidden-import", "openpyxl",
+        "--hidden-import", "openpyxl.cell._writer",
         "--hidden-import", "PIL",
         "--hidden-import", "PIL._tkinter_finder",
+        "--hidden-import", "charset_normalizer",
+        "--hidden-import", "charset_normalizer.md__mypyc",
+        "--hidden-import", "ssl",
+        "--hidden-import", "certifi",
     ]
 
     # Only bundle the assets folder if it actually contains files

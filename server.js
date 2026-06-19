@@ -3,6 +3,7 @@ const express    = require('express');
 const helmet     = require('helmet');
 const cors       = require('cors');
 const path       = require('path');
+const fs         = require('fs');
 const rateLimit  = require('express-rate-limit');
 
 const agentRouter   = require('./routes/agent');
@@ -85,6 +86,29 @@ app.use('/api/hst',     hstRouter);
 app.use('/api/receipt', receiptRouter);
 app.use('/api/ai',      aiRouter);
 app.use('/api/audit',  auditRouter);
+
+// Binary downloads — explicit headers so browsers treat these as file downloads,
+// and a real 404 if the file is missing (prevents the SPA fallback from silently
+// serving index.html masquerading as an .exe or .zip).
+const MIME_FOR_EXT = {
+  '.exe': 'application/octet-stream',
+  '.zip': 'application/zip',
+};
+
+app.get('/downloads/:filename', (req, res) => {
+  const filename = path.basename(req.params.filename);
+  const filePath = path.join(__dirname, 'public', 'downloads', filename);
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+
+  const ext  = path.extname(filename).toLowerCase();
+  const mime = MIME_FOR_EXT[ext] || 'application/octet-stream';
+  res.setHeader('Content-Type', mime);
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.sendFile(filePath, { root: __dirname });
+});
 
 // Serve frontend
 app.use(express.static(path.join(__dirname, 'public')));
