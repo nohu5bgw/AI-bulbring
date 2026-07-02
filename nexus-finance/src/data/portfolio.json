@@ -1,0 +1,27 @@
+{
+  "account": {
+    "type": "TFSA",
+    "provider": "Wealthsimple",
+    "number": "HQBJ0V5K5CAD"
+  },
+  "holdings": [
+    { "ticker": "XUS", "name": "iShares Core S&P 500 Index ETF", "shares": 3.6091, "bookValue": 235.63, "currency": "CAD", "yahooSymbol": "XUS.TO", "category": "Core ETF" },
+    { "ticker": "XQQ", "name": "iShares NASDAQ 100 Index ETF (CAD-Hedged)", "shares": 0.787, "bookValue": 57.12, "currency": "CAD", "yahooSymbol": "XQQ.TO", "category": "Core ETF" },
+    { "ticker": "NVDA", "name": "NVIDIA Corp", "shares": 0.6578, "bookValue": 129.96, "currency": "USD", "yahooSymbol": "NVDA", "category": "US Stock" },
+    { "ticker": "JPM", "name": "JPMorgan Chase", "shares": 0.1245, "bookValue": 40.42, "currency": "USD", "yahooSymbol": "JPM", "category": "US Stock" },
+    { "ticker": "AMD", "name": "Advanced Micro Devices", "shares": 0.0938, "bookValue": 49.97, "currency": "USD", "yahooSymbol": "AMD", "category": "US Stock" },
+    { "ticker": "ROL", "name": "Rollins Inc", "shares": 1, "bookValue": 44.99, "currency": "USD", "yahooSymbol": "ROL", "category": "US Stock" },
+    { "ticker": "DVN", "name": "Devon Energy", "shares": 1.2051, "bookValue": 51.76, "currency": "USD", "yahooSymbol": "DVN", "category": "US Stock" },
+    { "ticker": "LIME", "name": "Neutron Holdings (Lime)", "shares": 1, "bookValue": 27.0, "currency": "USD", "yahooSymbol": null, "category": "US Stock" },
+    { "ticker": "BULL", "name": "Webull Corp", "shares": 2.788, "bookValue": 19.99, "currency": "USD", "yahooSymbol": "BULL", "category": "US Stock" },
+    { "ticker": "STM", "name": "STMicroelectronics", "shares": 0.0347, "bookValue": 2.44, "currency": "USD", "yahooSymbol": "STM", "category": "US Stock" },
+    { "ticker": "SPCX", "name": "SpaceX", "shares": 0.8061, "bookValue": 144.97, "currency": "USD", "yahooSymbol": null, "category": "US Stock" },
+    { "ticker": "RKLB", "name": "Rocket Lab", "shares": 0.0117, "bookValue": 1.63, "currency": "USD", "yahooSymbol": "RKLB", "category": "Space/Defence/Speculative" },
+    { "ticker": "RDW", "name": "Redwire Corp", "shares": 2.1368, "bookValue": 30.0, "currency": "USD", "yahooSymbol": "RDW", "category": "Space/Defence/Speculative" },
+    { "ticker": "NASA", "name": "Tema Space Innovators ETF", "shares": 0.0113, "bookValue": 0.46, "currency": "USD", "yahooSymbol": "NASA", "category": "Space/Defence/Speculative" },
+    { "ticker": "ARBE", "name": "Arbe Robotics", "shares": 35.2941, "bookValue": 30.0, "currency": "USD", "yahooSymbol": "ARBE", "category": "Space/Defence/Speculative" },
+    { "ticker": "MVIS", "name": "MicroVision", "shares": 51.2564, "bookValue": 19.99, "currency": "USD", "yahooSymbol": "MVIS", "category": "Space/Defence/Speculative" },
+    { "ticker": "ATZ", "name": "Aritzia", "shares": 0.011, "bookValue": 1.71, "currency": "CAD", "yahooSymbol": "ATZ.TO", "category": "Canadian Stock" },
+    { "ticker": "NDM", "name": "Northern Dynasty Minerals", "shares": 13.1552, "bookValue": 39.4, "currency": "CAD", "yahooSymbol": "NDM.TO", "category": "Canadian Stock" }
+  ]
+}

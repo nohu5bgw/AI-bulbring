@@ -1,0 +1,10 @@
+{
+  "defaultCurrency": "CAD",
+  "moveAlertThresholdPct": 3,
+  "marketCacheTtlMs": 300000,
+  "indices": [
+    { "symbol": "^GSPC", "label": "S&P 500" },
+    { "symbol": "^IXIC", "label": "NASDAQ" },
+    { "symbol": "^GSPTSE", "label": "TSX" }
+  ]
+}

@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-base text-ink antialiased;
+}
+
+::selection {
+  background: rgba(51, 182, 255, 0.25);
+}
+
+/* Thin, dark scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1b2331 transparent;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #1b2331;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Markdown-ish rendering inside assistant messages */
+.msg-body table {
+  @apply w-full my-2 text-xs font-mono border-collapse;
+}
+.msg-body th {
+  @apply text-left text-muted font-normal uppercase tracking-wider border-b border-edge px-2 py-1;
+}
+.msg-body td {
+  @apply border-b border-edge/60 px-2 py-1 tabular-nums;
+}
+.msg-body code {
+  @apply font-mono text-accent text-[0.85em] bg-raised px-1 py-0.5;
+}
+.msg-body pre {
+  @apply bg-raised border border-edge p-3 my-2 overflow-x-auto text-xs;
+}
+.msg-body pre code {
+  @apply bg-transparent p-0;
+}
+.msg-body strong {
+  @apply text-ink font-semibold;
+}
+.msg-body ul {
+  @apply list-disc ml-5 my-1 space-y-0.5;
+}
+.msg-body ol {
+  @apply list-decimal ml-5 my-1 space-y-0.5;
+}
+.msg-body p {
+  @apply my-1.5;
+}
+.msg-body h1, .msg-body h2, .msg-body h3 {
+  @apply font-semibold text-ink mt-3 mb-1;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}

@@ -1,0 +1,7 @@
+{
+  "goals": [
+    { "id": "south-africa-trip", "name": "South Africa trip", "target": 3000, "current": 0, "deadline": "2026-12-01", "note": "December 2026" },
+    { "id": "banff-trip", "name": "Banff trip", "target": 800, "current": 0, "deadline": "2026-08-22", "note": "August 22-27" },
+    { "id": "toronto-move-fund", "name": "Toronto move fund", "target": 10000, "current": 0, "deadline": "2027-09-01", "note": "September 2027" }
+  ]
+}

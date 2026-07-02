@@ -1,0 +1,12 @@
+{
+  "categories": [
+    { "name": "Rent", "monthlyLimit": null },
+    { "name": "Food", "monthlyLimit": null },
+    { "name": "Transport", "monthlyLimit": null },
+    { "name": "Entertainment", "monthlyLimit": null },
+    { "name": "Subscriptions", "monthlyLimit": null },
+    { "name": "Savings", "monthlyLimit": null },
+    { "name": "Other", "monthlyLimit": null }
+  ],
+  "expenses": []
+}
